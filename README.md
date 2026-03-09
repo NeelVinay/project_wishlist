@@ -13,16 +13,17 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 ## Implemented Features
 
 ### Core
-- [x] Add items to a wishlist with a name and priority (1–10)
+- [x] Add items to a wishlist with a name, priority (1–10), and budget
 - [x] Edit an item's name or priority
 - [x] Delete items from the wishlist
-- [x] Input validation (no empty names, priority must be 1–10)
+- [x] Input validation (no empty names, priority must be 1–10, budget accepts numbers only)
 - [x] Empty wishlist message
 
 ### Sub-Items
 - [x] Expandable sub-items under any root item (click ▶ to toggle)
 - [x] Sub-items have their own name, priority, budget, and status
 - [x] Root item displays the average priority of its sub-items
+- [x] Budget input included in sub-item add form
 
 ### Search & Sort
 - [x] Real-time search bar (matches root and sub-item names)
@@ -35,8 +36,10 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Priority input as a dropdown select (1–10) instead of free text
 - [x] Date and time stamp on each root item and sub-item
 - [x] Color-coded priority badges (blue for low, red for high)
-- [x] Full-width responsive layout
-- [x] Dark/light mode toggle
+- [x] Full-width responsive layout (1400px max)
+- [x] Dark/light mode slider toggle
+- [x] True black dark mode theme
+- [x] Dark-mode-aware status badges and dropdowns
 
 ### Drag & Drop
 - [x] Drag and drop reordering for root items
@@ -74,13 +77,19 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] "In Progress" status excluded from progress calculation
 
 ### Budget Tracking
+- [x] Budget input in main add form (with $ prefix, numbers only)
+- [x] Budget input in sub-item add form (with $ prefix, numbers only)
 - [x] Editable budget on root items (without sub-items) and all sub-items
 - [x] Budget cap system: root item budget acts as ceiling for sub-item totals
 - [x] Budget cap popup on first sub-item addition
 - [x] Budget exceeded warning when sub-items would surpass the cap
+- [x] Budget validation on sub-item creation (prevents exceeding cap at add time)
+- [x] Budget cap cannot be set below current sub-item total
 - [x] Clickable root budget display showing allocated / cap amounts
 - [x] "Don't ask me again" option on informational popups
 - [x] RGB color picker on each root item for donut chart representation
+- [x] Color picker displays correct color (hex format)
+- [x] Duplicate colors prevented across root items
 - [x] Donut chart showing budget breakdown by root item (color-coded)
 - [x] Total budget displayed in center of donut chart
 - [x] Legend with item names, amounts, and percentages
@@ -132,7 +141,8 @@ wishlist/
 │   ├── App.css         # (empty - styles are inline)
 │   └── index.css       # Minimal body reset
 ├── README.md           # This file
-└── CHANGELOG.md        # Version history
+├── CHANGELOG.md        # Version history
+└── BUGFIXES.md         # Bug fix documentation
 ```
 
 *Structure will expand as backend/database is added.*

@@ -4,6 +4,27 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.9.0 — Budget Input Improvements & UI Polish
+**Date:** March 8, 2026
+
+### Added
+- Budget input field in the main add form (between item name and priority)
+- Budget input field in the sub-item add form
+- Dollar sign ($) prefix inside all budget input fields
+- Numbers-only validation on all budget inputs (digits and decimal only)
+- Budget cap enforcement when adding sub-items with pre-set budgets
+
+### Changed
+- Dark/light mode toggle changed from icon button to slider switch
+- Dark mode slider uses dark gray background instead of blue
+- Status badges and dropdowns use dark gray background in dark mode
+- Color picker now displays correct color (fixed HSL to hex conversion)
+- "$ budget" label capitalized to "$ Budget"
+- App container widened from 1100px to 1400px
+- Duplicate chart colors now prevented with error popup
+
+---
+
 ## v0.8.0 — Budget Cap & Auto-Status
 **Date:** March 8, 2026
 
@@ -32,10 +53,8 @@ All notable changes to the Wishlist App are documented here.
 - Donut chart (SVG) showing budget breakdown by root item
 - Chart legend with item names, dollar amounts, and percentages
 - Total budget displayed in center of donut chart
-- Container widened to 1100px for better use of screen space
 
 ### Changed
-- Budget input starts empty instead of "0" when editing
 - Removed sub-item count and average text from root item display
 
 ---
@@ -76,10 +95,10 @@ All notable changes to the Wishlist App are documented here.
 **Date:** March 8, 2026
 
 ### Added
-- Date and time stamp on each root item and sub-item (format: "8th March, 2026 2:15 pm")
+- Date and time stamp on each root item and sub-item
 - Ordinal suffix formatting (st, nd, rd, th)
-- Reverse sort toggle button (⇅) with blue highlight when active
-- Sort direction label shown below controls (e.g. "High → Low", "A → Z")
+- Reverse sort toggle button with blue highlight when active
+- Sort direction label shown below controls
 - Sort dropdown simplified to: Priority, Alphabetical, Date Added
 - Reverse toggle resets when changing sort modes
 - Sub-items follow the same sort mode and direction as root items
@@ -106,7 +125,7 @@ All notable changes to the Wishlist App are documented here.
 - Add, edit, and delete sub-items independently
 - Real-time search bar (matches root and sub-item names)
 - Search result count ("Showing 3 of 8 items")
-- Sort by: Priority (high → low), Alphabetical (A → Z), Newest first, Oldest first
+- Sort by: Priority, Alphabetical, Newest first, Oldest first
 - Timestamp (createdAt) stored on each item for date-based sorting
 
 ---
