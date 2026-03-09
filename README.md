@@ -76,6 +76,23 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Gradient color (red → yellow → green) with animated shine effect
 - [x] "In Progress" status excluded from progress calculation
 
+### Completed Section
+- [x] Clickable "completed" button on each item/sub-item (to the right of status)
+- [x] Collapsible "Completed" section at the bottom of the wishlist
+- [x] Completed items remain in the main wishlist (not removed)
+- [x] Completed section mirrors completed items for quick reference
+- [x] Sub-items appear in completed section individually as marked done
+- [x] Root item appears in completed section only when all sub-items are completed
+- [x] Checking root item cascades completion to all sub-items
+- [x] Checking last sub-item auto-completes the root item
+- [x] Unchecking a sub-item auto-uncompletes the root item
+- [x] Completed root items with sub-items show in expandable dropdown format
+
+### Sort
+- [x] Sort by: Priority, Alphabetical, Date Added, Status, Manual
+- [x] Sort by Status: Want → Saving For → In Progress → Purchased
+- [x] All sort modes reversible with toggle button
+
 ### Budget Tracking
 - [x] Budget input in main add form (with $ prefix, numbers only)
 - [x] Budget input in sub-item add form (with $ prefix, numbers only)
@@ -98,21 +115,11 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 
 ## Upcoming Features
 
-### Completed Section
-- [x] Clickable "completed" button on each item/sub-item (to the right of status)
-- [x] Collapsible "Completed" section at the bottom of the wishlist
-- [x] Completed items remain in the main wishlist (not removed)
-- [x] Completed section mirrors completed items for quick reference
-- [x] Sub-items appear in completed section individually as marked done
-- [x] Root item appears in completed section only when all sub-items are completed
-- [x] Checking root item cascades completion to all sub-items
-- [x] Checking last sub-item auto-completes the root item
-- [x] Unchecking a sub-item auto-uncompletes the root item
-- [x] Completed root items with sub-items show in expandable dropdown format
-
-### Sort by Status
-- [x] New sort option: sort by status (Want → Saving For → In Progress → Purchased)
-- [x] Reversible with existing toggle (Purchased → In Progress → Saving For → Want)
+### Progress Bar Rework
+- [ ] Remove status section (Want/Saving For/Purchased) from items
+- [ ] Replace single progress bar with two switchable progress bars
+- [ ] Progress bar 1: Completion-based, weighted by priority (higher priority items contribute more)
+- [ ] Progress bar 2: Savings-based, tracking money saved vs money needed (requires savings tracker)
 
 ### Multi-Page Routing
 - [ ] React Router implementation with navigation bar
