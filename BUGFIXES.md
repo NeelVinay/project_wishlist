@@ -4,6 +4,38 @@ All bug fixes for the Wishlist App are documented here.
 
 ---
 
+## BF-008 — ID collisions causing cross-item interference
+**Date:** March 9, 2026
+**Version:** v0.10.0
+**Severity:** High
+
+### Problem
+The ID generator (`let nextId = 1`) reset when the module re-initialized in React's development strict mode. This caused multiple items to receive the same ID, meaning operations like adding sub-items, toggling completion, or editing would affect the wrong item — particularly noticeable with items sharing the same priority and budget.
+
+### Fix
+Changed the ID generator seed from `1` to `Date.now()`, producing large unique starting values (e.g. `1741459200000`). IDs now never collide even if the module re-initializes.
+
+### Files Changed
+- `src/App.jsx` — Changed `let nextId = 1` to `let nextId = Date.now()`
+
+---
+
+## BF-007 — Undo/redo hook stale state causing toggle errors
+**Date:** March 9, 2026
+**Version:** v0.10.0
+**Severity:** High
+
+### Problem
+The `useUndoRedo` hook's `set` function captured `present` in its closure via the dependency array. When multiple rapid state changes occurred (e.g. toggling completed on items), the second change used a stale version of `present`, causing one item's toggle to incorrectly affect another item.
+
+### Fix
+Added a `useRef` (`presentRef`) that always holds the latest value of `present`. The `set` function now reads from `presentRef.current` instead of the closure-captured `present`, ensuring it always operates on the most recent state. The `undo` and `redo` functions were similarly updated.
+
+### Files Changed
+- `src/App.jsx` — Rewrote `useUndoRedo` hook to use `useRef` for current state tracking
+
+---
+
 ## BF-006 — Sub-item budget can exceed root budget cap on creation
 **Date:** March 8, 2026
 **Version:** v0.9.0

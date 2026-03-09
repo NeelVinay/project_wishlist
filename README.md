@@ -99,16 +99,20 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 ## Upcoming Features
 
 ### Completed Section
-- [ ] Clickable "completed" button on each item/sub-item (to the right of status)
-- [ ] Collapsible "Completed" section at the bottom of the wishlist
-- [ ] Completed items remain in the main wishlist (not removed)
-- [ ] Completed section mirrors completed items for quick reference
-- [ ] Sub-items appear in completed section individually as marked done
-- [ ] Root item appears in completed section only when all sub-items are completed
+- [x] Clickable "completed" button on each item/sub-item (to the right of status)
+- [x] Collapsible "Completed" section at the bottom of the wishlist
+- [x] Completed items remain in the main wishlist (not removed)
+- [x] Completed section mirrors completed items for quick reference
+- [x] Sub-items appear in completed section individually as marked done
+- [x] Root item appears in completed section only when all sub-items are completed
+- [x] Checking root item cascades completion to all sub-items
+- [x] Checking last sub-item auto-completes the root item
+- [x] Unchecking a sub-item auto-uncompletes the root item
+- [x] Completed root items with sub-items show in expandable dropdown format
 
 ### Sort by Status
-- [ ] New sort option: sort by status (Want → Saving For → Purchased)
-- [ ] Reversible with existing toggle (Purchased → Saving For → Want)
+- [x] New sort option: sort by status (Want → Saving For → In Progress → Purchased)
+- [x] Reversible with existing toggle (Purchased → In Progress → Saving For → Want)
 
 ### Multi-Page Routing
 - [ ] React Router implementation with navigation bar

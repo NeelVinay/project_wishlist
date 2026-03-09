@@ -4,6 +4,28 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.10.0 — Completed Section, Sort by Status & Bug Fixes
+**Date:** March 9, 2026
+
+### Added
+- Completed toggle button (○/✓) on each root item and sub-item (right of status)
+- Collapsible "Completed (n)" section at bottom of wishlist
+- Completed items remain in main wishlist; completed section is a mirror view
+- Root items with sub-items show in expandable dropdown format in completed section
+- Individual sub-items show separately when root is not fully completed
+- Checking a root item cascades completion to all its sub-items
+- Checking the last sub-item auto-completes the root item
+- Unchecking any sub-item auto-uncompletes the root item
+- Sort by Status option (Want → Saving For → In Progress → Purchased)
+- Status sort reversible with existing toggle button
+
+### Fixed
+- ID collision bug causing operations on one item to affect another (BF-008)
+- Undo/redo hook using stale state causing toggle to affect wrong items (BF-007)
+- Priority dropdown placeholder changed from "1-10" to "Priority"
+
+---
+
 ## v0.9.0 — Budget Input Improvements & UI Polish
 **Date:** March 8, 2026
 
