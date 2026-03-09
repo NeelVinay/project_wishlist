@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
-let nextId = 1;
+let nextId = Date.now();
 const generateId = () => nextId++;
 const randomColor = () => {
   const h = Math.floor(Math.random() * 360), s = 65, l = 55;
@@ -75,6 +75,8 @@ const sortSubItems = (subs, sm = "priority", rev = false) => {
   });
 };
 
+const STATUS_ORDER = { want: 0, saving: 1, inprogress: 2, purchased: 3 };
+
 const sortItems = (items, sm, rev) => {
   if (sm === "manual") return items;
   const dir = rev ? -1 : 1;
@@ -83,22 +85,37 @@ const sortItems = (items, sm, rev) => {
       case "priority": { const ap = getAveragePriority(a), bp = getAveragePriority(b); if (bp !== ap) return (bp - ap) * dir; return a.name.localeCompare(b.name); }
       case "alpha": return a.name.localeCompare(b.name) * dir;
       case "date": return (b.createdAt - a.createdAt) * dir;
+      case "status": {
+        const as = STATUS_ORDER[deriveRootStatus(a)] || 0;
+        const bs = STATUS_ORDER[deriveRootStatus(b)] || 0;
+        if (as !== bs) return (as - bs) * dir;
+        return a.name.localeCompare(b.name);
+      }
       default: return 0;
     }
   });
 };
 
 const getSortLabel = (m, r) => {
-  switch (m) { case "priority": return r ? "Low → High" : "High → Low"; case "alpha": return r ? "Z → A" : "A → Z"; case "date": return r ? "Oldest first" : "Newest first"; case "manual": return "Drag to reorder"; default: return ""; }
+  switch (m) { case "priority": return r ? "Low → High" : "High → Low"; case "alpha": return r ? "Z → A" : "A → Z"; case "date": return r ? "Oldest first" : "Newest first"; case "status": return r ? "Purchased → Want" : "Want → Purchased"; case "manual": return "Drag to reorder"; default: return ""; }
 };
 
 function useUndoRedo(initial) {
   const [past, setPast] = useState([]);
   const [present, setPresent] = useState(initial);
   const [future, setFuture] = useState([]);
-  const set = useCallback((ns) => { setPast((p) => [...p, present]); setPresent(typeof ns === "function" ? ns(present) : ns); setFuture([]); }, [present]);
-  const undo = useCallback(() => { if (!past.length) return; setFuture((f) => [present, ...f]); setPresent(past[past.length - 1]); setPast((p) => p.slice(0, -1)); }, [past, present]);
-  const redo = useCallback(() => { if (!future.length) return; setPast((p) => [...p, present]); setPresent(future[0]); setFuture((f) => f.slice(1)); }, [future, present]);
+  const presentRef = useRef(present);
+  presentRef.current = present;
+  const set = useCallback((ns) => {
+    const cur = presentRef.current;
+    setPast((p) => [...p, cur]);
+    const next = typeof ns === "function" ? ns(cur) : ns;
+    setPresent(next);
+    presentRef.current = next;
+    setFuture([]);
+  }, []);
+  const undo = useCallback(() => { if (!past.length) return; setFuture((f) => [presentRef.current, ...f]); const prev = past[past.length - 1]; setPresent(prev); presentRef.current = prev; setPast((p) => p.slice(0, -1)); }, [past]);
+  const redo = useCallback(() => { if (!future.length) return; setPast((p) => [...p, presentRef.current]); const next = future[0]; setPresent(next); presentRef.current = next; setFuture((f) => f.slice(1)); }, [future]);
   return { state: present, set, undo, redo, canUndo: past.length > 0, canRedo: future.length > 0 };
 }
 
@@ -326,7 +343,7 @@ function EditRow({ item, onSave, onCancel, isSubItem, dark }) {
   );
 }
 
-function SubItemRow({ subItem, onEdit, onDelete, editingId, onEditSave, onEditCancel, onStatusChange, onBudgetChange, dark }) {
+function SubItemRow({ subItem, onEdit, onDelete, editingId, onEditSave, onEditCancel, onStatusChange, onBudgetChange, onToggleCompleted, dark }) {
   const isEditing = editingId === subItem.id;
   return (
     <div style={getSubItemRowStyle(dark)}>
@@ -338,6 +355,10 @@ function SubItemRow({ subItem, onEdit, onDelete, editingId, onEditSave, onEditCa
           <span style={{ flex: 1, fontSize: 13, color: dark ? "#ccc" : "#333", marginLeft: 4 }}>{subItem.name}</span>
           <BudgetInput value={subItem.budget || 0} onChange={(v) => onBudgetChange(subItem.id, v)} dark={dark} small />
           <StatusSelect value={subItem.status || "want"} onChange={(s) => onStatusChange(subItem.id, s)} small dark={dark} />
+          <button onClick={() => onToggleCompleted(subItem.id)} title={subItem.completed ? "Mark incomplete" : "Mark completed"}
+            style={{ fontSize: 12, background: "none", border: "1px solid " + (subItem.completed ? "#27ae60" : (dark ? "#444" : "#ccc")), borderRadius: 4, cursor: "pointer", padding: "1px 6px", color: subItem.completed ? "#27ae60" : (dark ? "#666" : "#aaa"), fontWeight: 600, flexShrink: 0, transition: "all 0.15s" }}>
+            {subItem.completed ? "✓" : "○"}
+          </button>
           <span style={{ fontSize: 10, color: dark ? "#555" : "#bbb", whiteSpace: "nowrap", flexShrink: 0 }}>{formatDate(subItem.createdAt)}</span>
           <button onClick={() => onEdit(subItem.id)} style={getBtnIcon(dark)} title="Edit">✎</button>
           <button onClick={() => onDelete(subItem.id)} style={{ ...getBtnIcon(dark), color: "#c0392b" }} title="Delete">✕</button>
@@ -376,7 +397,7 @@ function AddSubItemForm({ onAdd, dark }) {
   );
 }
 
-function WishlistItem({ item, onDelete, onEdit, onEditSave, editingId, onEditCancel, onAddSub, onDeleteSub, onEditSub, onEditSubSave, onStatusChange, onSubStatusChange, onBudgetChange, onSubBudgetChange, onColorChange, onRootBudgetClick, dark, selected, onToggleSelect, selectMode, onDragStart, onDragOver, onDrop, dragOverId }) {
+function WishlistItem({ item, onDelete, onEdit, onEditSave, editingId, onEditCancel, onAddSub, onDeleteSub, onEditSub, onEditSubSave, onStatusChange, onSubStatusChange, onBudgetChange, onSubBudgetChange, onColorChange, onRootBudgetClick, onToggleCompleted, onToggleSubCompleted, dark, selected, onToggleSelect, selectMode, onDragStart, onDragOver, onDrop, dragOverId }) {
   const [expanded, setExpanded] = useState(false);
   const hasSubs = item.subItems && item.subItems.length > 0;
   const avgPriority = getAveragePriority(item);
@@ -412,6 +433,10 @@ function WishlistItem({ item, onDelete, onEdit, onEditSave, editingId, onEditCan
               <BudgetInput value={item.budget || 0} onChange={(v) => onBudgetChange(item.id, v)} dark={dark} />
             )}
             {hasSubs ? <StatusBadge status={rootStatus} dark={dark} /> : <StatusSelect value={item.status || "want"} onChange={(s) => onStatusChange(item.id, s)} dark={dark} />}
+            <button onClick={() => onToggleCompleted(item.id)} title={item.completed ? "Mark incomplete" : "Mark completed"}
+              style={{ fontSize: 14, background: "none", border: "1px solid " + (item.completed ? "#27ae60" : (dark ? "#444" : "#ccc")), borderRadius: 4, cursor: "pointer", padding: "2px 8px", color: item.completed ? "#27ae60" : (dark ? "#666" : "#aaa"), fontWeight: 600, flexShrink: 0, transition: "all 0.15s" }}>
+              {item.completed ? "✓" : "○"}
+            </button>
             <span style={{ fontSize: 11, color: dark ? "#555" : "#aaa", whiteSpace: "nowrap", flexShrink: 0 }}>{formatDate(item.createdAt)}</span>
             {!selectMode && (
               <>
@@ -431,11 +456,45 @@ function WishlistItem({ item, onDelete, onEdit, onEditSave, editingId, onEditCan
               onEditCancel={onEditCancel}
               onStatusChange={(subId, s) => onSubStatusChange(item.id, subId, s)}
               onBudgetChange={(subId, v) => onSubBudgetChange(item.id, subId, v)}
+              onToggleCompleted={(subId) => onToggleSubCompleted(item.id, subId)}
               dark={dark} />
           )) : (
             <p style={{ fontSize: 12, color: dark ? "#555" : "#bbb", margin: "4px 0", textAlign: "center" }}>No sub-items yet.</p>
           )}
           <AddSubItemForm onAdd={(subData) => onAddSub(item.id, subData)} dark={dark} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CompletedRootWithSubs({ item, dark }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div style={{ borderRadius: 8, border: "1px solid " + (dark ? "#222" : "#eee"), overflow: "hidden", opacity: 0.75 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", background: dark ? "#1a1a1a" : "#f8f9fa" }}>
+        <button onClick={() => setExpanded(!expanded)}
+          style={{ ...getBtnIcon(dark), fontSize: 10, transform: expanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s", color: "#27ae60" }}>▶</button>
+        <span style={{ color: "#27ae60", fontWeight: 700, fontSize: 14 }}>✓</span>
+        <PriorityBadge value={item.priority} small />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ fontSize: 14, color: dark ? "#ccc" : "#333", fontWeight: 500, textDecoration: "line-through", textDecorationColor: dark ? "#555" : "#bbb" }}>{item.name}</span>
+        </div>
+        {(item.budget || 0) > 0 && <span style={{ fontSize: 12, color: dark ? "#8ecae6" : "#2a6f97", fontWeight: 600, flexShrink: 0 }}>{fmtMoney(item.budget)}</span>}
+        <StatusBadge status="purchased" dark={dark} />
+        <span style={{ fontSize: 10, color: dark ? "#444" : "#bbb", whiteSpace: "nowrap", flexShrink: 0 }}>{formatDate(item.createdAt)}</span>
+      </div>
+      {expanded && item.subItems && (
+        <div style={{ padding: "6px 14px 10px 48px", background: dark ? "#111111" : "#f1f3f5", borderTop: "1px solid " + (dark ? "#222" : "#e9ecef"), display: "flex", flexDirection: "column", gap: 4 }}>
+          {item.subItems.map((sub) => (
+            <div key={"csub-" + sub.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 10px", background: dark ? "#1a1a1a" : "#fff", borderRadius: 6, border: "1px solid " + (dark ? "#222" : "#e9ecef") }}>
+              <span style={{ color: "#27ae60", fontWeight: 700, fontSize: 12 }}>✓</span>
+              <PriorityBadge value={sub.priority} small />
+              <span style={{ flex: 1, fontSize: 13, color: dark ? "#ccc" : "#333", textDecoration: "line-through", textDecorationColor: dark ? "#555" : "#bbb" }}>{sub.name}</span>
+              {(sub.budget || 0) > 0 && <span style={{ fontSize: 11, color: dark ? "#8ecae6" : "#2a6f97", fontWeight: 600, flexShrink: 0 }}>{fmtMoney(sub.budget)}</span>}
+              <span style={{ fontSize: 10, color: dark ? "#444" : "#bbb", whiteSpace: "nowrap", flexShrink: 0 }}>{formatDate(sub.createdAt)}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -455,6 +514,7 @@ function SearchSortBar({ searchQuery, onSearchChange, sortMode, onSortChange, re
         <option value="priority">Sort: Priority</option>
         <option value="alpha">Sort: Alphabetical</option>
         <option value="date">Sort: Date Added</option>
+        <option value="status">Sort: Status</option>
         <option value="manual">Sort: Manual</option>
       </select>
       <button onClick={onToggleReversed} title={"Currently: " + getSortLabel(sortMode, reversed)} disabled={sortMode === "manual"}
@@ -508,7 +568,7 @@ export default function WishlistApp() {
     if (!Number.isInteger(p) || p < 1 || p > 10) return setError("Priority must be a whole number from 1 to 10.");
     const b = parseFloat(budget);
     const budgetVal = isNaN(b) || b < 0 ? 0 : Math.round(b * 100) / 100;
-    setItems((prev) => sortItems([...prev, { id: generateId(), name: t, priority: p, subItems: [], createdAt: Date.now(), status: "want", budget: budgetVal, chartColor: randomColor() }], sortMode, reversed));
+    setItems((prev) => sortItems([...prev, { id: generateId(), name: t, priority: p, subItems: [], createdAt: Date.now(), status: "want", budget: budgetVal, chartColor: randomColor(), completed: false }], sortMode, reversed));
     setName(""); setPriority(""); setBudget(""); setError("");
   }, [name, priority, budget, sortMode, reversed, setItems]);
 
@@ -526,6 +586,30 @@ export default function WishlistApp() {
   const handleStatusChange = useCallback((id, s) => { setItems((prev) => prev.map((i) => (i.id === id ? { ...i, status: s } : i))); }, [setItems]);
   const handleSubStatusChange = useCallback((pid, sid, s) => { setItems((prev) => prev.map((i) => { if (i.id !== pid) return i; return { ...i, subItems: i.subItems.map((x) => (x.id === sid ? { ...x, status: s } : x)) }; })); }, [setItems]);
   const handleBudgetChange = useCallback((id, v) => { setItems((prev) => prev.map((i) => (i.id === id ? { ...i, budget: v } : i))); }, [setItems]);
+
+  const handleToggleCompleted = useCallback((id) => {
+    setItems((prev) => {
+      return prev.map((i) => {
+        if (i.id !== id) return i;
+        const newVal = !i.completed;
+        if (i.subItems && i.subItems.length > 0) {
+          return { ...i, completed: newVal, subItems: i.subItems.map((s) => ({ ...s, completed: newVal })) };
+        }
+        return { ...i, completed: newVal };
+      });
+    });
+  }, [setItems]);
+
+  const handleToggleSubCompleted = useCallback((pid, sid) => {
+    setItems((prev) => {
+      return prev.map((i) => {
+        if (i.id !== pid) return i;
+        const updatedSubs = i.subItems.map((s) => (s.id === sid ? { ...s, completed: !s.completed } : s));
+        const allDone = updatedSubs.every((s) => s.completed === true);
+        return { ...i, subItems: updatedSubs, completed: allDone };
+      });
+    });
+  }, [setItems]);
 
   const handleColorChange = useCallback((id, c) => {
     const conflict = items.find((i) => i.id !== id && i.chartColor && i.chartColor.toLowerCase() === c.toLowerCase());
@@ -565,7 +649,7 @@ export default function WishlistApp() {
     }
     setItems((prev) => sortItems(prev.map((i) => {
       if (i.id !== pid) return i;
-      return { ...i, subItems: sortSubItems([...i.subItems, { id: generateId(), ...sd, createdAt: Date.now(), status: "want", budget: sd.budget || 0 }], sortMode, reversed) };
+      return { ...i, subItems: sortSubItems([...i.subItems, { id: generateId(), ...sd, createdAt: Date.now(), status: "want", budget: sd.budget || 0, completed: false }], sortMode, reversed) };
     }), sortMode, reversed));
     if (isFirst && !dontAskBudgetCap) setBudgetPopup({ itemId: pid, isFirstSub: true });
   }, [items, sortMode, reversed, setItems, dontAskBudgetCap]);
@@ -603,6 +687,27 @@ export default function WishlistApp() {
 
   const totalItems = items.length, shownItems = displayedItems.length, isSearching = searchQuery.trim().length > 0;
   const budgetPopupItem = budgetPopup ? items.find((i) => i.id === budgetPopup.itemId) : null;
+
+  // Completed section data
+  const [showCompleted, setShowCompleted] = useState(false);
+  const completedItems = useMemo(() => {
+    const result = [];
+    items.forEach((item) => {
+      if (item.subItems && item.subItems.length > 0) {
+        // Root with subs: only show in completed section when ALL subs are done (root will be auto-completed)
+        if (item.completed === true && item.subItems.every((s) => s.completed === true)) {
+          result.push({ type: "root-with-subs", id: item.id, name: item.name, priority: getAveragePriority(item), budget: item.budget, status: deriveRootStatus(item), createdAt: item.createdAt, subItems: item.subItems, chartColor: item.chartColor });
+        } else {
+          // Show individually completed sub-items only if root is NOT fully completed
+          const completedSubs = item.subItems.filter((s) => s.completed === true);
+          completedSubs.forEach((sub) => result.push({ type: "sub", id: sub.id, parentId: item.id, parentName: item.name, name: sub.name, priority: sub.priority, budget: sub.budget, status: sub.status, createdAt: sub.createdAt }));
+        }
+      } else if (item.completed === true) {
+        result.push({ type: "root", id: item.id, name: item.name, priority: item.priority, budget: item.budget, status: item.status, createdAt: item.createdAt });
+      }
+    });
+    return result;
+  }, [items]);
 
   return (
     <div style={{ background: dark ? "#0a0a0a" : "#f0f0f0", minHeight: "100vh", transition: "background 0.2s" }}>
@@ -697,11 +802,44 @@ export default function WishlistApp() {
                 onStatusChange={handleStatusChange} onSubStatusChange={handleSubStatusChange}
                 onBudgetChange={handleBudgetChange} onSubBudgetChange={handleSubBudgetChange}
                 onColorChange={handleColorChange} onRootBudgetClick={handleRootBudgetClick}
+                onToggleCompleted={handleToggleCompleted} onToggleSubCompleted={handleToggleSubCompleted}
                 selected={selectedIds.has(item.id)} onToggleSelect={toggleSelect} selectMode={selectMode}
                 onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} dragOverId={dragOverId} />
             ))
           )}
         </div>
+
+        {totalItems > 0 && completedItems.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <button onClick={() => setShowCompleted((s) => !s)}
+              style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, padding: "8px 0", width: "100%" }}>
+              <span style={{ fontSize: 12, color: "#888", transform: showCompleted ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}>▶</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: dark ? "#888" : "#777" }}>Completed ({completedItems.length})</span>
+              <div style={{ flex: 1, height: 1, background: dark ? "#222" : "#e0e0e0", marginLeft: 8 }} />
+            </button>
+            {showCompleted && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+                {completedItems.map((ci) => (
+                  ci.type === "root-with-subs" ? (
+                    <CompletedRootWithSubs key={"rws-" + ci.id} item={ci} dark={dark} />
+                  ) : (
+                    <div key={ci.type + "-" + ci.id + (ci.parentId ? "-" + ci.parentId : "")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderRadius: 8, background: dark ? "#1a1a1a" : "#f8f9fa", border: "1px solid " + (dark ? "#222" : "#eee"), opacity: 0.75 }}>
+                      <span style={{ color: "#27ae60", fontWeight: 700, fontSize: 14 }}>✓</span>
+                      <PriorityBadge value={ci.priority} small />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontSize: 14, color: dark ? "#ccc" : "#333", fontWeight: 500, textDecoration: "line-through", textDecorationColor: dark ? "#555" : "#bbb" }}>{ci.name}</span>
+                        {ci.parentName && <span style={{ fontSize: 11, color: dark ? "#555" : "#999", marginLeft: 8 }}>in {ci.parentName}</span>}
+                      </div>
+                      {(ci.budget || 0) > 0 && <span style={{ fontSize: 12, color: dark ? "#8ecae6" : "#2a6f97", fontWeight: 600, flexShrink: 0 }}>{fmtMoney(ci.budget)}</span>}
+                      <StatusBadge status={ci.status || "purchased"} dark={dark} />
+                      <span style={{ fontSize: 10, color: dark ? "#444" : "#bbb", whiteSpace: "nowrap", flexShrink: 0 }}>{formatDate(ci.createdAt)}</span>
+                    </div>
+                  )
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {totalItems > 0 && items.some((i) => getItemBudget(i) > 0) && <DonutChart items={items} dark={dark} />}
       </div>
