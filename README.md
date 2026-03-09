@@ -33,7 +33,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Sub-items follow the same sort mode as root items
 
 ### UI & Input
-- [x] Priority input as a dropdown select (1–10) instead of free text
+- [x] Priority input as a dropdown select (1–10) with "Priority" placeholder
 - [x] Date and time stamp on each root item and sub-item
 - [x] Color-coded priority badges (blue for low, red for high)
 - [x] Full-width responsive layout (1400px max)
@@ -98,6 +98,49 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 
 ## Upcoming Features
 
+### Multi-Page Routing
+- [ ] React Router implementation with navigation bar
+- [ ] Landing page with feature overview and "Get Started" CTA
+- [ ] Main wishlist page (current app)
+- [ ] Data visualization page
+
+### Goals System
+- [ ] User-defined targets (hit X% completion by a date, buy X items, save $X for an item)
+- [ ] Goal progress tracking with deadlines
+- [ ] Goal completion notifications
+
+### Savings Tracker
+- [ ] "Saved" field on each item/sub-item alongside budget
+- [ ] Display format: "$120 / $500 saved"
+- [ ] Savings progress comparison against required budget
+
+### Interactive Donut Chart
+- [ ] Hover-to-expand ring segments (replaces static legend)
+- [ ] Tooltip/card showing item name, sub-items, and budget on hover
+- [ ] Animated segment expansion
+
+### Multi-Currency Support
+- [ ] Currency selector with search bar
+- [ ] Dynamic currency symbol swapping throughout the app
+- [ ] Exchange rate fetching (free API)
+- [ ] Base currency storage with display conversion
+
+### Advanced Data Visualizations Page
+- [ ] Multiple chart types (bar, treemap, bubble chart, etc.)
+- [ ] 3D rotatable sphere visualization (Three.js)
+- [ ] Sphere sectors sized by monetary value
+- [ ] Exploded view on sector click showing sub-items
+
+### Wishlist Village (Gamification)
+- [ ] Stardew Valley-style 2D pixel art village
+- [ ] Each house represents a wishlist item
+- [ ] House construction state reflects item completion (not built / under construction / finished)
+- [ ] Controllable character with walking animations
+- [ ] NPC town members with building/living animations
+- [ ] Enter completed houses to view sub-items as sprites
+- [ ] Earned currency for visual house upgrades
+- [ ] Selectable village themes
+
 ### Persistence
 - [ ] Database backend (Express.js + SQLite)
 - [ ] Data abstraction layer for easy storage swap
@@ -111,6 +154,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - **Build Tool:** Vite
 - **Styling:** Inline styles (no external CSS libraries)
 - **Persistence:** Database (planned — Express.js + SQLite)
+- **Planned Libraries:** React Router, Three.js, Phaser.js, D3.js
 
 ---
 
@@ -145,4 +189,4 @@ wishlist/
 └── BUGFIXES.md         # Bug fix documentation
 ```
 
-*Structure will expand as backend/database is added.*
+*Structure will expand significantly as routing, visualizations, and gamification are added.*
