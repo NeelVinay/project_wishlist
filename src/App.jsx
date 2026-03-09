@@ -32,6 +32,12 @@ const sortSubItems = (subs, sm = "priority", rev = false) => {
       case "priority": if (b.priority !== a.priority) return (b.priority - a.priority) * dir; return a.name.localeCompare(b.name);
       case "alpha": return a.name.localeCompare(b.name) * dir;
       case "date": return ((b.createdAt || 0) - (a.createdAt || 0)) * dir;
+      case "purchasable": {
+        const aReady = (a.budget || 0) > 0 && (a.saved || 0) >= (a.budget || 0) ? 1 : 0;
+        const bReady = (b.budget || 0) > 0 && (b.saved || 0) >= (b.budget || 0) ? 1 : 0;
+        if (bReady !== aReady) return (bReady - aReady) * dir;
+        return a.name.localeCompare(b.name);
+      }
       default: return 0;
     }
   });
@@ -44,12 +50,18 @@ const sortItems = (items, sm, rev) => {
       case "priority": { const ap = getAveragePriority(a), bp = getAveragePriority(b); if (bp !== ap) return (bp - ap) * dir; return a.name.localeCompare(b.name); }
       case "alpha": return a.name.localeCompare(b.name) * dir;
       case "date": return (b.createdAt - a.createdAt) * dir;
+      case "purchasable": {
+        const aReady = (a.budget || 0) > 0 && (a.saved || 0) >= (a.budget || 0) ? 1 : 0;
+        const bReady = (b.budget || 0) > 0 && (b.saved || 0) >= (b.budget || 0) ? 1 : 0;
+        if (bReady !== aReady) return (bReady - aReady) * dir;
+        return a.name.localeCompare(b.name);
+      }
       default: return 0;
     }
   });
 };
 const getSortLabel = (m, r) => {
-  switch (m) { case "priority": return r ? "Low → High" : "High → Low"; case "alpha": return r ? "Z → A" : "A → Z"; case "date": return r ? "Oldest first" : "Newest first"; case "manual": return "Drag to reorder"; default: return ""; }
+  switch (m) { case "priority": return r ? "Low → High" : "High → Low"; case "alpha": return r ? "Z → A" : "A → Z"; case "date": return r ? "Oldest first" : "Newest first"; case "purchasable": return r ? "Not ready first" : "Ready to buy first"; case "manual": return "Drag to reorder"; default: return ""; }
 };
 
 // ─── Progress calculations ───
@@ -236,7 +248,7 @@ function SavedInput({ value, budget, onChange, dark, small, editable }) {
   const savedExceedsBudget = budget > 0 && (value || 0) > budget;
   const savedMatchesBudget = budget > 0 && (value || 0) === budget;
   const glowGreen = savedExceedsBudget || savedMatchesBudget;
-  const commit = () => { const n = parseFloat(draft); onChange(isNaN(n) || n < 0 ? 0 : Math.round(n * 100) / 100); setEditing(false); };
+  const commit = () => { const n = parseFloat(draft); onChange(draft === "" ? null : (isNaN(n) || n < 0 ? 0 : Math.round(n * 100) / 100)); setEditing(false); };
   if (editing && editable) {
     return (
       <div style={{ display: "inline-flex", alignItems: "center", position: "relative", flexShrink: 0 }}>
@@ -245,12 +257,13 @@ function SavedInput({ value, budget, onChange, dark, small, editable }) {
       </div>
     );
   }
-  const displayText = (value || 0) > 0 ? fmtMoney(value) + " saved" : (small ? "Saved" : "Saved");
+  const hasValue = value !== null && value !== undefined;
+  const displayText = hasValue ? fmtMoney(value) + " saved" : (small ? "Saved" : "Saved");
   if (!editable) {
-    return (<span title={savedExceedsBudget ? "Amount saved exceeds budget!" : (savedMatchesBudget ? "Amount saved matches budget!" : "")} style={{ fontSize: small ? 11 : 12, fontWeight: 600, padding: small ? "2px 6px" : "3px 8px", borderRadius: 4, flexShrink: 0, whiteSpace: "nowrap", color: (value || 0) > 0 ? (dark ? "#8ecae6" : "#2a6f97") : (dark ? "#555" : "#bbb"), border: "1px solid " + (glowGreen ? "#27ae60" : (dark ? "#333" : "#e0e0e0")), boxShadow: glowGreen ? "0 0 6px #27ae6066" : "none" }}>{displayText}</span>);
+    return (<span title={savedExceedsBudget ? "Amount saved exceeds budget!" : (savedMatchesBudget ? "Amount saved matches budget!" : "")} style={{ fontSize: small ? 11 : 12, fontWeight: 600, padding: small ? "2px 6px" : "3px 8px", borderRadius: 4, flexShrink: 0, whiteSpace: "nowrap", color: hasValue ? (dark ? "#8ecae6" : "#2a6f97") : (dark ? "#555" : "#bbb"), border: "1px solid " + (glowGreen ? "#27ae60" : (dark ? "#333" : "#e0e0e0")), boxShadow: glowGreen ? "0 0 6px #27ae6066" : "none" }}>{displayText}</span>);
   }
   return (
-    <button onClick={() => { setDraft(value ? String(value) : ""); setEditing(true); }} title={savedExceedsBudget ? "Amount saved exceeds budget!" : (savedMatchesBudget ? "Amount saved matches budget!" : "Click to set saved amount")} style={{ background: "none", borderRadius: 4, padding: small ? "2px 6px" : "3px 8px", fontSize: small ? 11 : 12, color: (value || 0) > 0 ? (dark ? "#8ecae6" : "#2a6f97") : (dark ? "#555" : "#bbb"), cursor: "pointer", fontWeight: 600, flexShrink: 0, whiteSpace: "nowrap", border: "1px solid " + (glowGreen ? "#27ae60" : (dark ? "#333" : "#e0e0e0")), boxShadow: glowGreen ? "0 0 6px #27ae6066" : "none", transition: "all 0.2s" }}>{displayText}</button>
+    <button onClick={() => { setDraft(hasValue ? String(value) : ""); setEditing(true); }} title={savedExceedsBudget ? "Amount saved exceeds budget!" : (savedMatchesBudget ? "Amount saved matches budget!" : "Click to set saved amount")} style={{ background: "none", borderRadius: 4, padding: small ? "2px 6px" : "3px 8px", fontSize: small ? 11 : 12, color: hasValue ? (dark ? "#8ecae6" : "#2a6f97") : (dark ? "#555" : "#bbb"), cursor: "pointer", fontWeight: 600, flexShrink: 0, whiteSpace: "nowrap", border: "1px solid " + (glowGreen ? "#27ae60" : (dark ? "#333" : "#e0e0e0")), boxShadow: glowGreen ? "0 0 6px #27ae6066" : "none", transition: "all 0.2s" }}>{displayText}</button>
   );
 }
 function BudgetInput({ value, onChange, dark, small }) {
@@ -275,8 +288,10 @@ function EditRow({ item, onSave, onCancel, isSubItem, dark }) {
 // ─── Sub-Item Row (no status) ───
 function SubItemRow({ subItem, onEdit, onDelete, editingId, onEditSave, onEditCancel, onBudgetChange, onSavedChange, onToggleCompleted, dark }) {
   const isEditing = editingId === subItem.id;
+  const isPurchasable = (subItem.budget || 0) > 0 && (subItem.saved || 0) >= (subItem.budget || 0);
+  const rowStyle = { ...getSubItemRowStyle(dark), ...(isPurchasable ? { background: dark ? "#0a2e0a" : "#eafaf1" } : {}) };
   return (
-    <div style={getSubItemRowStyle(dark)}>
+    <div style={rowStyle}>
       {isEditing ? (<EditRow item={subItem} isSubItem onSave={(u) => onEditSave(subItem.id, u)} onCancel={onEditCancel} dark={dark} />) : (
         <>
           <PriorityBadge value={subItem.priority} small />
@@ -324,11 +339,12 @@ function WishlistItem({ item, onDelete, onEdit, onEditSave, editingId, onEditCan
   const isDragOver = dragOverId === item.id;
   const subTotal = getSubItemBudgetTotal(item);
   const displayedSaved = hasSubs ? getSubItemSavedTotal(item) : (item.saved || 0);
+  const isPurchasable = (item.budget || 0) > 0 && displayedSaved >= (item.budget || 0);
 
   return (
     <div style={{ ...getItemContainer(dark), outline: selected ? "2px solid #4285f4" : "none", borderTop: isDragOver ? "3px solid #4285f4" : "1px solid " + (dark ? "#222" : "#eee"), transition: "border-top 0.1s" }}
       draggable={!isEditing && !selectMode} onDragStart={(e) => onDragStart && onDragStart(e, item.id)} onDragOver={(e) => onDragOver && onDragOver(e, item.id)} onDrop={(e) => onDrop && onDrop(e, item.id)}>
-      <div style={getItemRow(dark)}>
+      <div style={{ ...getItemRow(dark), ...(isPurchasable ? { background: dark ? "#0a2e0a" : "#eafaf1" } : {}) }}>
         {isEditing ? (<EditRow item={item} onSave={(u) => onEditSave(item.id, u)} onCancel={onEditCancel} dark={dark} />) : (
           <>
             {selectMode && <input type="checkbox" checked={selected} onChange={() => onToggleSelect(item.id)} style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#4285f4", flexShrink: 0 }} />}
@@ -401,7 +417,7 @@ function SearchSortBar({ searchQuery, onSearchChange, sortMode, onSortChange, re
         <input value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} placeholder="Search items..." style={{ ...getInputStyle(dark), width: "100%", paddingLeft: 32, boxSizing: "border-box" }} />
       </div>
       <select value={sortMode} onChange={(e) => onSortChange(e.target.value)} style={{ ...getInputStyle(dark), cursor: "pointer", color: dark ? "#ccc" : "#555", minWidth: 130, appearance: "auto" }}>
-        <option value="priority">Sort: Priority</option><option value="alpha">Sort: Alphabetical</option><option value="date">Sort: Date Added</option><option value="manual">Sort: Manual</option>
+        <option value="priority">Sort: Priority</option><option value="alpha">Sort: Alphabetical</option><option value="date">Sort: Date Added</option><option value="purchasable">Sort: Purchasable</option><option value="manual">Sort: Manual</option>
       </select>
       <button onClick={onToggleReversed} title={"Currently: " + getSortLabel(sortMode, reversed)} disabled={sortMode === "manual"}
         style={{ ...getInputStyle(dark), display: "inline-flex", alignItems: "center", justifyContent: "center", width: 42, height: 42, padding: 0, cursor: sortMode === "manual" ? "default" : "pointer", background: reversed ? "#e8f0fe" : (dark ? "#222" : "#fafafa"), borderColor: reversed ? "#4285f4" : (dark ? "#333" : "#e0e0e0"), color: reversed ? "#4285f4" : "#999", fontSize: 18, fontWeight: 700, transition: "all 0.15s", flexShrink: 0, opacity: sortMode === "manual" ? 0.4 : 1 }}>⇅</button>

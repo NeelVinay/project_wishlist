@@ -1,34 +1,35 @@
 # Wishlist App
 
-A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories, rate their priority, track your spending with budget caps, and monitor your progress toward getting everything you want.
+A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories, rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars.
 
 ---
 
 ## What It Does
 
-This app lets you create and manage a prioritized wishlist. Each item has a name, a priority rating (1–10), a budget, a status, and can contain sub-items with their own ratings and budgets. Root items act as budget caps for their sub-items, and their status is automatically derived from the sub-items beneath them. Items are searchable, sortable, and timestamped. A progress bar tracks your overall completion, and a donut chart visualizes your budget breakdown.
+This app lets you create and manage a prioritized wishlist. Each item has a name, a priority rating (1–10), a budget, a saved amount, and can contain sub-items (classes) with their own ratings, budgets, and savings. Root items act as budget caps for their sub-items, and root saved amounts auto-calculate from sub-item totals. Items are searchable, sortable, and timestamped. Two switchable progress bars track completion (weighted by priority) and savings. A donut chart visualizes budget breakdown.
 
 ---
 
 ## Implemented Features
 
 ### Core
-- [x] Add items to a wishlist with a name, priority (1–10), and budget
+- [x] Add items to a wishlist with a name, priority (1–10), saved amount, and budget
 - [x] Edit an item's name or priority
 - [x] Delete items from the wishlist
-- [x] Input validation (no empty names, priority must be 1–10, budget accepts numbers only)
+- [x] Input validation (no empty names, priority must be 1–10, budget/saved accept numbers only)
 - [x] Empty wishlist message
 
-### Sub-Items
+### Sub-Items (Classes)
 - [x] Expandable sub-items under any root item (click ▶ to toggle)
-- [x] Sub-items have their own name, priority, budget, and status
+- [x] Sub-items have their own name, priority, budget, and saved amount
 - [x] Root item displays the average priority of its sub-items
-- [x] Budget input included in sub-item add form
+- [x] Budget and saved inputs included in sub-item add form
 
 ### Search & Sort
 - [x] Real-time search bar (matches root and sub-item names)
 - [x] Search result count ("Showing 3 of 8 items")
-- [x] Sort by: Priority, Alphabetical, Date Added, Manual
+- [x] Sort by: Priority, Alphabetical, Date Added, Purchasable, Manual
+- [x] Sort by Purchasable works on both root items and sub-items within classes
 - [x] Reverse sort toggle button with visual indicator
 - [x] Sub-items follow the same sort mode as root items
 
@@ -39,7 +40,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Full-width responsive layout (1400px max)
 - [x] Dark/light mode slider toggle
 - [x] True black dark mode theme
-- [x] Dark-mode-aware status badges and dropdowns
+- [x] Solid borders throughout (no dashed borders)
 
 ### Drag & Drop
 - [x] Drag and drop reordering for root items
@@ -62,22 +63,8 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Bulk delete with confirmation
 - [x] Cancel to exit select mode
 
-### Status Tracking
-- [x] Status field on each item and sub-item: "Want", "Saving For", "Purchased"
-- [x] Color-coded status badges (red, orange, green)
-- [x] Auto-derived root status when sub-items exist
-- [x] "In Progress" status shown when sub-items have mixed statuses
-- [x] Manual status control for root items without sub-items
-
-### Progress Bar
-- [x] Overall progress bar across the entire wishlist
-- [x] Progress calculation: Want = 0%, Saving For = 50%, Purchased = 100%
-- [x] Single bar representing the average progress of all items/sub-items
-- [x] Gradient color (red → yellow → green) with animated shine effect
-- [x] "In Progress" status excluded from progress calculation
-
 ### Completed Section
-- [x] Clickable "completed" button on each item/sub-item (to the right of status)
+- [x] Clickable "completed" button on each item/sub-item (to the right of budget)
 - [x] Collapsible "Completed" section at the bottom of the wishlist
 - [x] Completed items remain in the main wishlist (not removed)
 - [x] Completed section mirrors completed items for quick reference
@@ -88,21 +75,38 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Unchecking a sub-item auto-uncompletes the root item
 - [x] Completed root items with sub-items show in expandable dropdown format
 
-### Sort
-- [x] Sort by: Priority, Alphabetical, Date Added, Status, Manual
-- [x] Sort by Status: Want → Saving For → In Progress → Purchased
-- [x] All sort modes reversible with toggle button
+### Progress Bars
+- [x] Two switchable progress bars with tab selector
+- [x] Completion Progress: weighted by item priority (higher priority = more weight)
+- [x] Savings Progress: total saved vs total budget across all items
+- [x] Active bar renders in front, inactive bar faded behind at 35% opacity
+- [x] Gradient color (red → yellow → green) with animated shine effect
+- [x] Savings bar capped at 100%
+
+### Savings Tracker
+- [x] Saved field on each item and sub-item (to the left of budget)
+- [x] Root items without sub-items: editable saved amount
+- [x] Classes: auto-calculated sum of sub-item saved amounts (not editable)
+- [x] Sub-items: individually editable saved amounts
+- [x] Displays as "$x saved" format
+- [x] Saved input in main add form and sub-item add form
+- [x] Numbers-only validation on saved inputs
+- [x] Green outline + tooltip when saved matches budget ("Amount saved matches budget!")
+- [x] Green outline + tooltip when saved exceeds budget ("Amount saved exceeds budget!")
+- [x] Popup warning when adding first sub-item to root with existing saved amount
+- [x] Root saved auto-updates when sub-item saved amounts change
 
 ### Budget Tracking
 - [x] Budget input in main add form (with $ prefix, numbers only)
 - [x] Budget input in sub-item add form (with $ prefix, numbers only)
 - [x] Editable budget on root items (without sub-items) and all sub-items
 - [x] Budget cap system: root item budget acts as ceiling for sub-item totals
+- [x] Classes display "$X remaining" (total budget minus allocated sub-item budgets)
 - [x] Budget cap popup on first sub-item addition
 - [x] Budget exceeded warning when sub-items would surpass the cap
 - [x] Budget validation on sub-item creation (prevents exceeding cap at add time)
 - [x] Budget cap cannot be set below current sub-item total
-- [x] Clickable root budget display showing allocated / cap amounts
+- [x] Clickable budget display to change the cap
 - [x] "Don't ask me again" option on informational popups
 - [x] RGB color picker on each root item for donut chart representation
 - [x] Color picker displays correct color (hex format)
@@ -111,15 +115,18 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Total budget displayed in center of donut chart
 - [x] Legend with item names, amounts, and percentages
 
+### UI & Visual
+- [x] Purchasable items (saved >= budget) highlighted with light green row background
+- [x] Green background works on both root items and sub-items
+- [x] Tooltips on saved field: "matches budget" vs "exceeds budget"
+
 ---
 
 ## Upcoming Features
 
-### Progress Bar Rework
-- [ ] Remove status section (Want/Saving For/Purchased) from items
-- [ ] Replace single progress bar with two switchable progress bars
-- [ ] Progress bar 1: Completion-based, weighted by priority (higher priority items contribute more)
-- [ ] Progress bar 2: Savings-based, tracking money saved vs money needed (requires savings tracker)
+### Progress Bar Animation
+- [ ] Stacked/rotating card animation for switching between progress bars
+- [ ] Smooth flip/slide transition on click
 
 ### Multi-Page Routing
 - [ ] React Router implementation with navigation bar
@@ -131,23 +138,6 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] User-defined targets (hit X% completion by a date, buy X items, save $X for an item)
 - [ ] Goal progress tracking with deadlines
 - [ ] Goal completion notifications
-
-### Savings Tracker
-- [x] Saved field on each item and sub-item (to the left of budget)
-- [x] Root items without sub-items: editable saved amount
-- [x] Root items with sub-items: auto-calculated sum of sub-item saved amounts (not editable)
-- [x] Sub-items: individually editable saved amounts
-- [x] Displays as "$x saved" format
-- [x] Saved input in main add form and sub-item add form
-- [x] Numbers-only validation on saved inputs
-- [x] Green outline + tooltip when saved matches budget ("Amount saved matches budget!")
-- [x] Green outline + tooltip when saved exceeds budget ("Amount saved exceeds budget!")
-- [x] Popup warning when adding first sub-item to root with existing saved amount
-- [x] Root saved auto-updates when sub-item saved amounts change
-
-### Sort by Purchasable
-- [ ] New sort option: sort by items that are currently purchasable (saved >= budget)
-- [ ] Purchasable items sorted to top
 
 ### Interactive Donut Chart
 - [ ] Hover-to-expand ring segments (replaces static legend)
@@ -169,7 +159,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 ### Wishlist Village (Gamification)
 - [ ] Stardew Valley-style 2D pixel art village
 - [ ] Each house represents a wishlist item
-- [ ] House construction state reflects item completion (not built / under construction / finished)
+- [ ] House construction state reflects item completion
 - [ ] Controllable character with walking animations
 - [ ] NPC town members with building/living animations
 - [ ] Enter completed houses to view sub-items as sprites
