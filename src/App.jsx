@@ -269,7 +269,7 @@ function PrioritySelect({ value, onChange, small, showPlaceholder, dark }) {
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)}
       style={{ ...getInputStyle(dark), textAlign: "center", cursor: "pointer", color: value ? (dark ? "#e0e0e0" : "#333") : "#999", ...base }}>
-      {showPlaceholder && <option value="" disabled>1-10</option>}
+      {showPlaceholder && <option value="" disabled>Priority</option>}
       {[1,2,3,4,5,6,7,8,9,10].map((n) => <option key={n} value={n}>{n}</option>)}
     </select>
   );
