@@ -133,9 +133,21 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Goal completion notifications
 
 ### Savings Tracker
-- [ ] "Saved" field on each item/sub-item alongside budget
-- [ ] Display format: "$120 / $500 saved"
-- [ ] Savings progress comparison against required budget
+- [x] Saved field on each item and sub-item (to the left of budget)
+- [x] Root items without sub-items: editable saved amount
+- [x] Root items with sub-items: auto-calculated sum of sub-item saved amounts (not editable)
+- [x] Sub-items: individually editable saved amounts
+- [x] Displays as "$x saved" format
+- [x] Saved input in main add form and sub-item add form
+- [x] Numbers-only validation on saved inputs
+- [x] Green outline + tooltip when saved matches budget ("Amount saved matches budget!")
+- [x] Green outline + tooltip when saved exceeds budget ("Amount saved exceeds budget!")
+- [x] Popup warning when adding first sub-item to root with existing saved amount
+- [x] Root saved auto-updates when sub-item saved amounts change
+
+### Sort by Purchasable
+- [ ] New sort option: sort by items that are currently purchasable (saved >= budget)
+- [ ] Purchasable items sorted to top
 
 ### Interactive Donut Chart
 - [ ] Hover-to-expand ring segments (replaces static legend)

@@ -4,6 +4,28 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.11.0 — Savings Tracker
+**Date:** March 9, 2026
+
+### Added
+- Saved field on each root item and sub-item (to the left of budget)
+- Saved input in main add form and sub-item add form with $ prefix
+- Root items without sub-items: editable saved amount
+- Root items with sub-items: auto-calculated sum of sub-item saved (not editable)
+- Root saved auto-updates when any sub-item saved amount changes
+- Displays as "$x saved" format
+- Green outline and tooltip when saved matches budget ("Amount saved matches budget!")
+- Green outline and tooltip when saved exceeds budget ("Amount saved exceeds budget!")
+- Popup warning when adding first sub-item to a root that already has a saved amount
+- Completed section now shows saved amounts alongside budget
+
+### Removed
+- Savings exceeded popup with update/complete/dismiss options (simplified)
+- Saved discrepancy popup and red glow logic (simplified)
+- Percentage toggle on saved display (simplified)
+
+---
+
 ## v0.10.0 — Completed Section, Sort by Status & Bug Fixes
 **Date:** March 9, 2026
 

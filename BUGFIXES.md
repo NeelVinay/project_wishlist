@@ -4,6 +4,22 @@ All bug fixes for the Wishlist App are documented here.
 
 ---
 
+## BF-009 — Saved tooltip says "exceeds" when saved equals budget
+**Date:** March 9, 2026
+**Version:** v0.11.0
+**Severity:** Low (cosmetic)
+
+### Problem
+When a sub-item or root item's saved amount exactly matched the budget, the tooltip incorrectly displayed "Amount saved exceeds budget!" instead of indicating a match.
+
+### Fix
+Split the check into two conditions: `saved > budget` triggers "exceeds" tooltip, `saved === budget` triggers "matches" tooltip. Both show the green outline, but with accurate messaging.
+
+### Files Changed
+- `src/App.jsx` — Added `savedMatchesBudget` check in `SavedInput`, updated tooltip text for both states
+
+---
+
 ## BF-008 — ID collisions causing cross-item interference
 **Date:** March 9, 2026
 **Version:** v0.10.0
