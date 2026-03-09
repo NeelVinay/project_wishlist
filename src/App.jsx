@@ -648,10 +648,10 @@ export default function WishlistApp() {
           <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()}
             placeholder="Item name" style={{ ...getInputStyle(dark), flex: 1, minWidth: 140 }} />
           <div style={{ position: "relative", flexShrink: 0 }}>
-            <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 14, color: dark ? "#8ecae6" : "#2a6f97", fontWeight: 600, pointerEvents: "none" }}>$</span>
+            <span style={{ position: "absolute", left: 8, top: "47%", transform: "translateY(-50%)", fontSize: 14, color: dark ? "#8ecae6" : "#2a6f97", fontWeight: 600, pointerEvents: "none" }}>$</span>
             <input value={budget} onChange={(e) => { const v = e.target.value; if (v === "" || /^\d*\.?\d{0,2}$/.test(v)) setBudget(v); }}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-              placeholder="Budget" style={{ ...getInputStyle(dark), width: 100, paddingLeft: 24 }} />
+              placeholder="Budget" style={{ ...getInputStyle(dark), width: 100, paddingLeft: 22 }} />
           </div>
           <PrioritySelect value={priority} onChange={setPriority} showPlaceholder dark={dark} />
           <button onClick={handleAdd} style={btnAdd}>Add</button>
