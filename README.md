@@ -1,12 +1,12 @@
 # Wishlist App
 
-A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories, rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars.
+A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories (classes), rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars. Features interactive donut chart visualization, multi-currency support, and a completed items section.
 
 ---
 
 ## What It Does
 
-This app lets you create and manage a prioritized wishlist. Each item has a name, a priority rating (1–10), a budget, a saved amount, and can contain sub-items (classes) with their own ratings, budgets, and savings. Root items act as budget caps for their sub-items, and root saved amounts auto-calculate from sub-item totals. Items are searchable, sortable, and timestamped. Two switchable progress bars track completion (weighted by priority) and savings. A donut chart visualizes budget breakdown.
+This app lets you create and manage a prioritized wishlist. Each item has a name, a priority rating (1–10), a budget, a saved amount, and can contain sub-items (classes) with their own ratings, budgets, and savings. Root items act as budget caps for their sub-items, and root saved amounts auto-calculate from sub-item totals. Items are searchable, sortable (including by purchasability), and timestamped. Two switchable progress bars track completion (weighted by priority) and savings. An interactive donut chart with hover details visualizes budget breakdown. Supports 38 currencies.
 
 ---
 
@@ -33,14 +33,17 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Reverse sort toggle button with visual indicator
 - [x] Sub-items follow the same sort mode as root items
 
-### UI & Input
+### UI & Visual
 - [x] Priority input as a dropdown select (1–10) with "Priority" placeholder
 - [x] Date and time stamp on each root item and sub-item
 - [x] Color-coded priority badges (blue for low, red for high)
 - [x] Full-width responsive layout (1400px max)
 - [x] Dark/light mode slider toggle
 - [x] True black dark mode theme
-- [x] Solid borders throughout (no dashed borders)
+- [x] Solid borders throughout
+- [x] Purchasable items (saved >= budget) highlighted with light green row background
+- [x] Green background works on both root items and sub-items
+- [x] Tooltips on saved field: "matches budget" vs "exceeds budget"
 
 ### Drag & Drop
 - [x] Drag and drop reordering for root items
@@ -64,7 +67,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Cancel to exit select mode
 
 ### Completed Section
-- [x] Clickable "completed" button on each item/sub-item (to the right of budget)
+- [x] Clickable "completed" button on each item/sub-item
 - [x] Collapsible "Completed" section at the bottom of the wishlist
 - [x] Completed items remain in the main wishlist (not removed)
 - [x] Completed section mirrors completed items for quick reference
@@ -91,14 +94,14 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Displays as "$x saved" format
 - [x] Saved input in main add form and sub-item add form
 - [x] Numbers-only validation on saved inputs
-- [x] Green outline + tooltip when saved matches budget ("Amount saved matches budget!")
-- [x] Green outline + tooltip when saved exceeds budget ("Amount saved exceeds budget!")
+- [x] Green row background when saved matches or exceeds budget
 - [x] Popup warning when adding first sub-item to root with existing saved amount
 - [x] Root saved auto-updates when sub-item saved amounts change
+- [x] Zero is a valid saved amount (distinct from "not set")
 
 ### Budget Tracking
-- [x] Budget input in main add form (with $ prefix, numbers only)
-- [x] Budget input in sub-item add form (with $ prefix, numbers only)
+- [x] Budget input in main add form (with currency prefix, numbers only)
+- [x] Budget input in sub-item add form (with currency prefix, numbers only)
 - [x] Editable budget on root items (without sub-items) and all sub-items
 - [x] Budget cap system: root item budget acts as ceiling for sub-item totals
 - [x] Classes display "$X remaining" (total budget minus allocated sub-item budgets)
@@ -111,18 +114,39 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] RGB color picker on each root item for donut chart representation
 - [x] Color picker displays correct color (hex format)
 - [x] Duplicate colors prevented across root items
+
+### Interactive Donut Chart
 - [x] Donut chart showing budget breakdown by root item (color-coded)
 - [x] Total budget displayed in center of donut chart
-- [x] Legend with item names, amounts, and percentages
+- [x] Hover-to-expand ring segments with smooth animation
+- [x] Non-hovered segments fade to 15% opacity
+- [x] Precise arc-path hit detection (only donut ring area is hoverable)
+- [x] Info panel to the right of donut with border, background, and shadow
+- [x] Info panel shows item name, color, budget, share %, saved amount
+- [x] Classes show sub-items with individual budget and percentage contribution
+- [x] Info panel animates in with opacity and slide transition
+- [x] "Hover over a segment to see details" placeholder when not hovering
 
-### UI & Visual
-- [x] Purchasable items (saved >= budget) highlighted with light green row background
-- [x] Green background works on both root items and sub-items
-- [x] Tooltips on saved field: "matches budget" vs "exceeds budget"
+### Multi-Currency Support (Level 1)
+- [x] 38 currencies with code, symbol, name, country, and decimal places
+- [x] Searchable currency selector (search by code, name, country, or symbol)
+- [x] Dropdown appears as user types with filtered results
+- [x] Aligned columns in dropdown (symbol, code, description)
+- [x] Dynamic currency symbol throughout the entire app
+- [x] Currency-aware number formatting (respects decimal places per currency)
+- [x] Default currency: USD
 
 ---
 
 ## Upcoming Features
+
+### Multi-Currency Support (Level 2)
+- [ ] Per-item currency override (optional currency field on each item/sub-item)
+- [ ] Exchange rate API integration (free tier)
+- [ ] Automatic conversion when items have different currencies
+- [ ] Prompt user to pick universal display currency for data visualizations
+- [ ] Base currency storage with display conversion
+- [ ] Exchange rate caching
 
 ### Progress Bar Animation
 - [ ] Stacked/rotating card animation for switching between progress bars
@@ -138,17 +162,6 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] User-defined targets (hit X% completion by a date, buy X items, save $X for an item)
 - [ ] Goal progress tracking with deadlines
 - [ ] Goal completion notifications
-
-### Interactive Donut Chart
-- [ ] Hover-to-expand ring segments (replaces static legend)
-- [ ] Tooltip/card showing item name, sub-items, and budget on hover
-- [ ] Animated segment expansion
-
-### Multi-Currency Support
-- [ ] Currency selector with search bar
-- [ ] Dynamic currency symbol swapping throughout the app
-- [ ] Exchange rate fetching (free API)
-- [ ] Base currency storage with display conversion
 
 ### Advanced Data Visualizations Page
 - [ ] Multiple chart types (bar, treemap, bubble chart, etc.)

@@ -4,19 +4,35 @@ All bug fixes for the Wishlist App are documented here.
 
 ---
 
+## BF-011 — Donut chart layout shift, oversized hitbox, missing info panel styling
+**Date:** March 9, 2026
+**Version:** v0.15.0
+**Severity:** Medium
+
+### Problem
+Four issues with the donut chart: (1) Hovering over a segment caused the entire donut to shift right because the enlarged stroke overflowed the SVG viewBox. (2) The hit detection area extended into the center hole and outside the donut ring, triggering hover in empty space. (3) The info panel had no visible border/outline, appearing to float. (4) The info panel appeared abruptly with no animation.
+
+### Fix
+Full rewrite of DonutChart component. Added padding to SVG viewBox so enlarged strokes stay within bounds. Replaced circle-stroke hit areas with precise arc `<path>` elements that trace the exact inner and outer boundaries of each segment. Info panel now has a solid border, background color, border-radius, and box-shadow. Panel transitions between states using CSS opacity (0.5 to 1) and transform (translateY 6px to 0) over 0.4s. Fixed-width containers for both donut and panel prevent layout reflow.
+
+### Files Changed
+- `src/App.jsx` — Complete rewrite of DonutChart with arc-path hit detection, padded viewBox, styled info panel with transitions
+
+---
+
 ## BF-010 — Saved input rejects 0 as valid value
 **Date:** March 9, 2026
 **Version:** v0.13.0
 **Severity:** Medium
 
 ### Problem
-When a user entered 0 as the saved amount for a root item or class, the input reverted back to the editable "Saved" button instead of displaying "$0 saved". The value 0 was treated the same as "not set".
+When a user entered 0 as the saved amount, the input reverted to the "Saved" button instead of displaying "$0 saved".
 
 ### Fix
-Changed the commit function to distinguish between an empty string (stores `null`, meaning "never set") and the value `0` (stores `0`, a valid amount). Updated the display logic to use a `hasValue` check (`value !== null && value !== undefined`) instead of checking `value > 0`.
+Changed commit function to distinguish between empty string (stores null) and value 0 (stores 0). Updated display logic to use `hasValue` check instead of `value > 0`.
 
 ### Files Changed
-- `src/App.jsx` — Updated `SavedInput` commit function and display logic
+- `src/App.jsx` — Updated SavedInput commit function and display logic
 
 ---
 
@@ -26,13 +42,13 @@ Changed the commit function to distinguish between an empty string (stores `null
 **Severity:** Low (cosmetic)
 
 ### Problem
-When a sub-item or root item's saved amount exactly matched the budget, the tooltip incorrectly displayed "Amount saved exceeds budget!" instead of indicating a match.
+When saved exactly matched budget, tooltip said "exceeds" instead of "matches".
 
 ### Fix
-Split the check into two conditions: `saved > budget` triggers "exceeds" tooltip, `saved === budget` triggers "matches" tooltip. Both show the green outline, but with accurate messaging.
+Split into two conditions: `saved > budget` shows "exceeds", `saved === budget` shows "matches".
 
 ### Files Changed
-- `src/App.jsx` — Added `savedMatchesBudget` check in `SavedInput`, updated tooltip text
+- `src/App.jsx` — Added separate match/exceed checks in SavedInput
 
 ---
 
@@ -42,10 +58,10 @@ Split the check into two conditions: `saved > budget` triggers "exceeds" tooltip
 **Severity:** High
 
 ### Problem
-The ID generator (`let nextId = 1`) reset when the module re-initialized in React's development strict mode. This caused multiple items to receive the same ID, meaning operations like adding sub-items, toggling completion, or editing would affect the wrong item.
+ID generator reset on module re-initialization in React strict mode, causing duplicate IDs and cross-item interference.
 
 ### Fix
-Changed the ID generator seed from `1` to `Date.now()`, producing large unique starting values. IDs now never collide even if the module re-initializes.
+Changed seed from `1` to `Date.now()` for guaranteed unique IDs.
 
 ### Files Changed
 - `src/App.jsx` — Changed `let nextId = 1` to `let nextId = Date.now()`
@@ -58,13 +74,13 @@ Changed the ID generator seed from `1` to `Date.now()`, producing large unique s
 **Severity:** High
 
 ### Problem
-The `useUndoRedo` hook's `set` function captured `present` in its closure. When multiple rapid state changes occurred, the second change used a stale version of `present`, causing one item's toggle to incorrectly affect another.
+The useUndoRedo hook captured stale `present` in closures, causing rapid toggles to affect wrong items.
 
 ### Fix
-Added a `useRef` (`presentRef`) that always holds the latest value of `present`. The `set`, `undo`, and `redo` functions now read from `presentRef.current`.
+Added `useRef` to always read latest state value.
 
 ### Files Changed
-- `src/App.jsx` — Rewrote `useUndoRedo` hook to use `useRef`
+- `src/App.jsx` — Rewrote useUndoRedo with useRef
 
 ---
 
@@ -74,13 +90,13 @@ Added a `useRef` (`presentRef`) that always holds the latest value of `present`.
 **Severity:** Medium
 
 ### Problem
-When adding sub-items with a pre-set budget, the app did not check whether the new sub-item's budget would push the total past the root item's budget cap.
+Adding sub-items with pre-set budgets didn't check against the root's budget cap.
 
 ### Fix
-Added budget cap validation in `handleAddSub` before creating the sub-item.
+Added cap validation in handleAddSub before creating sub-item.
 
 ### Files Changed
-- `src/App.jsx` — Added cap check logic in `handleAddSub`
+- `src/App.jsx` — Added cap check in handleAddSub
 
 ---
 
@@ -90,13 +106,13 @@ Added budget cap validation in `handleAddSub` before creating the sub-item.
 **Severity:** Low
 
 ### Problem
-Budget input fields accepted any characters including letters and dashes.
+Budget fields accepted letters, dashes, and special characters.
 
 ### Fix
-Added regex validation (`/^\d*\.?\d{0,2}$/`) on all budget input `onChange` handlers.
+Added regex validation on all budget input onChange handlers.
 
 ### Files Changed
-- `src/App.jsx` — Updated onChange handlers in all budget inputs
+- `src/App.jsx` — Updated onChange handlers with numeric regex
 
 ---
 
@@ -106,13 +122,13 @@ Added regex validation (`/^\d*\.?\d{0,2}$/`) on all budget input `onChange` hand
 **Severity:** Low
 
 ### Problem
-`randomColor()` generated HSL format but the color picker only accepts hex format, falling back to black.
+randomColor() generated HSL format but color picker only accepts hex.
 
 ### Fix
-Rewrote `randomColor()` to output hex color codes with HSL-to-hex conversion.
+Rewrote randomColor() to output hex codes.
 
 ### Files Changed
-- `src/App.jsx` — Rewrote `randomColor()` function
+- `src/App.jsx` — HSL-to-hex conversion in randomColor()
 
 ---
 
@@ -122,13 +138,13 @@ Rewrote `randomColor()` to output hex color codes with HSL-to-hex conversion.
 **Severity:** Medium
 
 ### Problem
-When editing a root item's budget cap, the user could set it below the current sub-item budget total.
+Budget cap could be set below existing sub-item total.
 
 ### Fix
-Added `minBudget` validation in `BudgetCapPopup` with inline error message.
+Added minBudget validation in BudgetCapPopup.
 
 ### Files Changed
-- `src/App.jsx` — Added `minBudget` prop and validation to `BudgetCapPopup`
+- `src/App.jsx` — Added minBudget prop and validation
 
 ---
 
@@ -138,13 +154,13 @@ Added `minBudget` validation in `BudgetCapPopup` with inline error message.
 **Severity:** Low
 
 ### Problem
-Multiple root items could be assigned the same chart color, making the donut chart confusing.
+Multiple root items could share the same chart color.
 
 ### Fix
-Added duplicate check in `handleColorChange` with conflict popup.
+Added duplicate check with conflict popup.
 
 ### Files Changed
-- `src/App.jsx` — Added `colorConflict` state and validation
+- `src/App.jsx` — Added colorConflict state and validation
 
 ---
 
@@ -154,10 +170,10 @@ Added duplicate check in `handleColorChange` with conflict popup.
 **Severity:** Low (cosmetic)
 
 ### Problem
-Dark mode used purple-tinted backgrounds instead of true dark/black tones.
+Dark mode used purple-tinted backgrounds.
 
 ### Fix
-Updated all dark mode colors to neutral black/dark gray tones.
+Updated all dark mode colors to neutral black/gray tones.
 
 ### Files Changed
 - `src/App.jsx` — Updated all dark mode color values
