@@ -1,46 +1,61 @@
-import React from "react";
-import { ACCENT } from "../styles";
+import React, { useState, useEffect } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
+import BudgetSphere from "../components/sphere/BudgetSphere";
+import { loadItems, loadCurrencyCode } from "../utils/storage";
+import { CURRENCIES } from "../constants/currencies";
+import { getItemBudget } from "../utils/calculations";
 
 export default function DataVizPage() {
-  return (
-    <div style={{
-      minHeight: "100vh", background: "#0a0a0a",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      fontFamily: "'Inter',system-ui,-apple-system,sans-serif",
-    }}>
-      <div style={{ textAlign: "center", padding: "0 24px" }}>
-        <h1 style={{ fontSize: 48, fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-1.5px", lineHeight: 1.2 }}>
-          Data Visualization
-        </h1>
+  const [items, setItems] = useState([]);
+  const [currency, setCurrency] = useState(CURRENCIES[0]);
 
-        <p style={{ fontSize: 22, color: ACCENT, margin: "16px 0 0", fontWeight: 600 }}>
-          Like you have never seen before.
+  useEffect(() => {
+    const loaded = loadItems().filter((i) => !i.completed);
+    setItems(loaded);
+    const code = loadCurrencyCode();
+    if (code) {
+      const found = CURRENCIES.find((c) => c.code === code);
+      if (found) setCurrency(found);
+    }
+  }, []);
+
+  const total = items.reduce((s, i) => s + getItemBudget(i), 0);
+
+  if (total === 0) {
+    return (
+      <div style={{
+        minHeight: "100vh", background: "#000",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        fontFamily: "'Inter',system-ui,-apple-system,sans-serif",
+      }}>
+        <p style={{ fontSize: 18, color: "rgba(255,255,255,0.4)" }}>
+          No wishlist items with budgets to visualize.
         </p>
-
-        <p style={{ fontSize: 15, color: "rgba(255,255,255,0.35)", margin: "20px auto 0", maxWidth: 460, lineHeight: 1.7 }}>
-          Interactive charts, 3D visualizations, budget breakdowns, and progress tracking - all in one place. See your wishlist from every angle.
-        </p>
-
-        <div style={{ marginTop: 48, display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap" }}>
-          {[
-            { label: "Donut Charts" },
-            { label: "Treemaps" },
-            { label: "3D Sphere" },
-            { label: "Bar Charts" },
-          ].map((v) => (
-            <div key={v.label} style={{
-              padding: "20px 24px", borderRadius: 10, background: "#1a1a1a", border: "1px solid #222",
-              textAlign: "center", minWidth: 100,
-            }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>{v.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <p style={{ fontSize: 18, color: "rgba(255,255,255,0.2)", margin: "60px 0 0", fontStyle: "italic" }}>
-          Coming soon.
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.2)", marginTop: 8 }}>
+          Add items in the wishlist app first.
         </p>
       </div>
+    );
+  }
+
+  return (
+    <div style={{ width: "100vw", height: "100vh", background: "#000" }}>
+      <Canvas
+        camera={{ position: [0, 0, 6], fov: 50 }}
+        scene={{ background: new THREE.Color(0x000000) }}
+        onPointerMissed={() => {}}
+      >
+        <BudgetSphere items={items} total={total} currency={currency} />
+        <OrbitControls
+          makeDefault
+          enableDamping
+          dampingFactor={0.08}
+          minDistance={3}
+          maxDistance={12}
+        />
+      </Canvas>
     </div>
   );
 }

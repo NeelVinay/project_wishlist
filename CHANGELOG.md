@@ -4,6 +4,41 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.17.0 — 3D Voronoi Sphere Visualization
+**Date:** March 11, 2026
+
+### Added
+- 3D interactive sphere visualization on `/visualize` route (Three.js + React Three Fiber)
+- Sphere divided into organic Voronoi-like cells proportional to each item's budget
+- Voronoi cells generated via subdivided icosahedron (20,480 faces) with Fibonacci spiral seed placement
+- Hover interaction: cells pull out radially from the sphere with smooth lerp animation and name label
+- Click interaction: isolates a cell (others fade to 8% opacity), shows detail overlay with budget, share %, saved amount, and sub-items
+- Click away to deselect with smooth opacity return animation
+- Rotate (drag) and zoom (scroll) via OrbitControls
+- Cracked-earth gap effect between cells for organic aesthetic
+- Solid cell geometry with boundary side walls visible on hover pull-out
+- Slightly transparent materials (82% opacity) to avoid flat beach-ball appearance
+- Empty state message when no items have budgets
+
+---
+
+## v0.16.0 — localStorage Persistence
+**Date:** March 11, 2026
+
+### Added
+- localStorage persistence for wishlist items, currency, and user preferences
+- `src/utils/storage.js` — centralized storage utility (loadItems, saveItems, loadCurrencyCode, saveCurrencyCode, loadPref, savePref)
+- Items auto-save on every add, edit, delete, reorder, undo, and redo
+- Currency selection persists across page refreshes
+- "Don't ask budget cap" preference persists
+- Data loads from localStorage on app start; corrupted data fails gracefully to empty state
+
+### Changed
+- `useUndoRedo` hook now accepts optional `persistFn` callback, called on every state change
+- WishlistApp initializes state from localStorage instead of empty defaults
+
+---
+
 ## v0.15.0 — Interactive Donut Chart & Full Rewrite
 **Date:** March 9, 2026
 

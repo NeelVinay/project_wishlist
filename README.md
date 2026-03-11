@@ -1,6 +1,6 @@
 # Wishlist App
 
-A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories (classes), rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars. Features interactive donut chart visualization, multi-currency support, and a completed items section.
+A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories (classes), rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars. Features interactive donut chart visualization, a 3D Voronoi sphere budget visualization, localStorage persistence, multi-currency support, and a completed items section.
 
 ---
 
@@ -127,6 +127,24 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Info panel animates in with opacity and slide transition
 - [x] "Hover over a segment to see details" placeholder when not hovering
 
+### localStorage Persistence
+- [x] Wishlist items persist across page refreshes via localStorage
+- [x] Currency selection persists
+- [x] User preferences (e.g., "don't ask budget cap") persist
+- [x] Graceful fallback on corrupted or missing data
+- [x] Centralized storage utility for easy future database migration
+
+### 3D Voronoi Sphere Visualization
+- [x] Interactive 3D sphere on the Data Visualization page (`/visualize`)
+- [x] Sphere divided into organic Voronoi-like cells (cracked-earth aesthetic)
+- [x] Cell area proportional to each item's budget share
+- [x] Hover: cell pulls out radially from sphere with name label
+- [x] Click: isolates cell, shows detail overlay (budget, share %, saved, sub-items)
+- [x] Click elsewhere to deselect with smooth animation
+- [x] Rotate (drag) and zoom (scroll) controls
+- [x] Slightly transparent materials for depth effect
+- [x] Solid cell geometry with visible cross-section on hover
+
 ### Multi-Currency Support (Level 1)
 - [x] 38 currencies with code, symbol, name, country, and decimal places
 - [x] Searchable currency selector (search by code, name, country, or symbol)
@@ -164,10 +182,12 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Goal completion notifications
 
 ### Advanced Data Visualizations Page
+- [x] 3D rotatable sphere visualization (Three.js + React Three Fiber)
+- [x] Sphere sectors sized by monetary value (Voronoi cells)
+- [ ] Exploded view toggle with auto-rotation
+- [ ] Selectable geometry styles (Voronoi, curved triangles, hex grid, spiral bands)
+- [ ] Visual themes (default colors, Earth, Star Wars/Coruscant)
 - [ ] Multiple chart types (bar, treemap, bubble chart, etc.)
-- [ ] 3D rotatable sphere visualization (Three.js)
-- [ ] Sphere sectors sized by monetary value
-- [ ] Exploded view on sector click showing sub-items
 
 ### Wishlist Village (Gamification)
 - [ ] Stardew Valley-style 2D pixel art village
@@ -197,9 +217,9 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Smooth hyperdrive/warp animation when jumping between planets
 
 ### Persistence
+- [x] localStorage persistence (current — items, currency, preferences)
 - [ ] Database backend (Express.js + SQLite)
 - [ ] Data abstraction layer for easy storage swap
-- [ ] Data persists across page refreshes and browser restarts
 
 ---
 
@@ -209,9 +229,10 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - **Build Tool:** Vite
 - **Routing:** React Router v6
 - **Styling:** Inline styles (no external CSS libraries)
-- **Persistence:** Database (planned — Express.js + SQLite)
+- **3D Visualization:** Three.js, React Three Fiber, drei
+- **Persistence:** localStorage (current), database planned (Express.js + SQLite)
 - **Auth:** Planned — JWT or session-based
-- **Planned Libraries:** Three.js, Phaser.js, D3.js
+- **Planned Libraries:** Phaser.js, D3.js
 
 ---
 
@@ -233,17 +254,40 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 
 ```
 wishlist/
-├── index.html          # Entry HTML file
-├── package.json        # Dependencies and scripts
-├── vite.config.js      # Vite configuration
+├── index.html
+├── package.json
+├── vite.config.js
 ├── src/
-│   ├── main.jsx        # React entry point
-│   ├── App.jsx         # Main wishlist application (all components)
-│   ├── App.css         # (empty - styles are inline)
-│   └── index.css       # Minimal body reset
-├── README.md           # This file
-├── CHANGELOG.md        # Version history
-└── BUGFIXES.md         # Bug fix documentation
+│   ├── main.jsx                    # React entry point
+│   ├── App.jsx                     # Router + NavBar
+│   ├── styles.js                   # Shared style functions + ACCENT color
+│   ├── constants/
+│   │   └── currencies.js           # 38 currencies
+│   ├── utils/
+│   │   ├── storage.js              # localStorage persistence
+│   │   ├── calculations.js         # Budget/progress calculations
+│   │   ├── formatting.js           # Currency formatting
+│   │   ├── sorting.js              # Sort functions
+│   │   └── ids.js                  # ID generation
+│   ├── hooks/
+│   │   └── useUndoRedo.js          # Undo/redo with persist callback
+│   ├── pages/
+│   │   ├── LandingPage.jsx         # Home page
+│   │   ├── WishlistApp.jsx         # Main wishlist (stateful)
+│   │   ├── DataVizPage.jsx         # 3D sphere visualization
+│   │   └── AboutPage.jsx           # About page
+│   └── components/
+│       ├── sphere/
+│       │   ├── VoronoiGeometry.js   # Voronoi cell computation
+│       │   ├── SphereCell.jsx       # Individual cell mesh + interactions
+│       │   ├── BudgetSphere.jsx     # Root 3D component
+│       │   └── WedgeDetail.jsx      # Click detail overlay
+│       ├── popups/                  # Popup components
+│       ├── DonutChart.jsx           # SVG donut chart
+│       ├── ProgressSection.jsx      # Progress bars
+│       ├── WItem.jsx                # Wishlist item row
+│       └── ...                      # Other UI components
+├── README.md
+├── CHANGELOG.md
+└── BUGFIXES.md
 ```
-
-*Structure will expand significantly as routing, visualizations, and gamification are added.*

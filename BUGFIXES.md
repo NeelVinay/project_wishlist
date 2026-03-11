@@ -4,6 +4,39 @@ All bug fixes for the Wishlist App are documented here.
 
 ---
 
+## BF-013 — Voronoi geometry crash on non-indexed IcosahedronGeometry
+**Date:** March 11, 2026
+**Version:** v0.17.0
+**Severity:** Critical
+
+### Problem
+Three.js `IcosahedronGeometry` creates non-indexed geometry where `getIndex()` returns `null`. The initial Voronoi cell implementation assumed indexed geometry, causing `null.count` to crash and render a blank white screen.
+
+### Fix
+Added `faceVertexIndex()` helper that handles both indexed and non-indexed geometry. Changed edge map keys from vertex indices (which aren't shared in non-indexed geo) to position-based string keys so shared edges between adjacent faces are properly detected.
+
+### Files Changed
+- `src/components/sphere/VoronoiGeometry.js` — Added null-safe index handling and position-based edge keys
+
+---
+
+## BF-012 — Wedge geometry mergeGeometries fails on mismatched attributes
+**Date:** March 11, 2026
+**Version:** v0.17.0
+**Severity:** High
+
+### Problem
+The initial wedge-based sphere sectors used `mergeGeometries` to combine the outer SphereGeometry (which has UV attributes) with manually-created side panels (which only have position attributes). This attribute mismatch caused `mergeGeometries` to fail silently, producing invisible meshes and a black screen.
+
+### Fix
+Split each wedge into three separate meshes rendered in a group (later replaced entirely by Voronoi cell geometry which builds a single non-indexed BufferGeometry).
+
+### Files Changed
+- `src/components/sphere/WedgeGeometry.js` — Separated into individual geometry functions (later replaced by VoronoiGeometry.js)
+- `src/components/sphere/SphereWedge.jsx` — Rendered three separate meshes (later replaced by SphereCell.jsx)
+
+---
+
 ## BF-011 — Donut chart layout shift, oversized hitbox, missing info panel styling
 **Date:** March 9, 2026
 **Version:** v0.15.0

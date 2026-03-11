@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import { useUndoRedo } from "../hooks/useUndoRedo";
 import { CURRENCIES } from "../constants/currencies";
 import { generateId, randomColor } from "../utils/ids";
+import { loadItems, saveItems, loadCurrencyCode, saveCurrencyCode, loadPref, savePref } from "../utils/storage";
 import { fmtMoney, formatDate } from "../utils/formatting";
 import { sortRoot, sortSubs, getSortLabel } from "../utils/sorting";
 import { getItemBudget, getSubBudgetTotal, getSubSavedTotal } from "../utils/calculations";
@@ -22,8 +23,11 @@ import CompletedRoot from "../components/CompletedRoot";
 
 export default function WishlistApp() {
   const dark = true;
-  const [currency, setCurrency] = useState(CURRENCIES[0]);
-  const { state: items, set: setItems, undo, redo, canUndo, canRedo } = useUndoRedo([]);
+  const [currency, setCurrency] = useState(() => {
+    const code = loadCurrencyCode();
+    return CURRENCIES.find(c => c.code === code) || CURRENCIES[0];
+  });
+  const { state: items, set: setItems, undo, redo, canUndo, canRedo } = useUndoRedo(loadItems(), saveItems);
   const [name, setName] = useState(""); const [priority, setPriority] = useState(""); const [budget, setBudget] = useState(""); const [saved, setSaved] = useState("");
   const [error, setError] = useState(""); const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); const [sortMode, setSortMode] = useState("priority"); const [reversed, setReversed] = useState(false);
@@ -33,7 +37,7 @@ export default function WishlistApp() {
   const [budgetPopup, setBudgetPopup] = useState(null);
   const [budgetExceeded, setBudgetExceeded] = useState(null);
   const [colorConflict, setColorConflict] = useState(null);
-  const [dontAskBudgetCap, setDontAskBudgetCap] = useState(false);
+  const [dontAskBudgetCap, setDontAskBudgetCap] = useState(() => loadPref("dontAskBudgetCap") ?? false);
   const [savedWillChange, setSavedWillChange] = useState(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
@@ -41,6 +45,9 @@ export default function WishlistApp() {
     const h = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "z") { e.preventDefault(); if (e.shiftKey) redo(); else undo(); } };
     window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h);
   }, [undo, redo]);
+
+  useEffect(() => { saveCurrencyCode(currency.code); }, [currency]);
+  useEffect(() => { savePref("dontAskBudgetCap", dontAskBudgetCap); }, [dontAskBudgetCap]);
 
   const displayed = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
