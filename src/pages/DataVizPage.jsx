@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import BudgetSphere from "../components/sphere/BudgetSphere";
+import SphereControls from "../components/sphere/SphereControls";
 import { loadItems, loadCurrencyCode } from "../utils/storage";
 import { CURRENCIES } from "../constants/currencies";
 import { getItemBudget } from "../utils/calculations";
@@ -10,6 +11,7 @@ import { getItemBudget } from "../utils/calculations";
 export default function DataVizPage() {
   const [items, setItems] = useState([]);
   const [currency, setCurrency] = useState(CURRENCIES[0]);
+  const [exploded, setExploded] = useState(false);
 
   useEffect(() => {
     const loaded = loadItems().filter((i) => !i.completed);
@@ -41,21 +43,22 @@ export default function DataVizPage() {
   }
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#000" }}>
+    <div style={{ width: "100vw", height: "100vh", background: "#000", position: "relative" }}>
       <Canvas
         camera={{ position: [0, 0, 6], fov: 50 }}
         scene={{ background: new THREE.Color(0x000000) }}
         onPointerMissed={() => {}}
       >
-        <BudgetSphere items={items} total={total} currency={currency} />
+        <BudgetSphere items={items} total={total} currency={currency} exploded={exploded} />
         <OrbitControls
           makeDefault
           enableDamping
           dampingFactor={0.08}
           minDistance={3}
-          maxDistance={12}
+          maxDistance={20}
         />
       </Canvas>
+      <SphereControls exploded={exploded} onToggleExplode={() => setExploded((e) => !e)} />
     </div>
   );
 }

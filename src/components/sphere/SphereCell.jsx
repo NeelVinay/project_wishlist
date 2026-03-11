@@ -5,12 +5,13 @@ import * as THREE from "three";
 import { createCellGeometry } from "./VoronoiGeometry";
 
 const HOVER_OFFSET = 0.4;
+const EXPLODE_OFFSET = 0.8;
 const LERP_SPEED = 0.1;
 const BASE_OPACITY = 0.82;
 
 export default React.memo(function SphereCell({
   icoGeo, cellData, radius, color, name,
-  isHovered, isSelected, hasSelection, singleItem,
+  isHovered, isSelected, hasSelection, singleItem, exploded,
   onHover, onSelect,
 }) {
   const groupRef = useRef();
@@ -35,8 +36,11 @@ export default React.memo(function SphereCell({
   useFrame(() => {
     if (!groupRef.current) return;
 
-    // Pull out radially on hover (disabled for single item)
-    const targetDist = isHovered && !singleItem ? HOVER_OFFSET : 0;
+    // Compound offset: explode + hover, both along radial direction
+    let targetDist = 0;
+    if (exploded) targetDist += EXPLODE_OFFSET;
+    if (isHovered && !singleItem) targetDist += HOVER_OFFSET;
+
     const pos = groupRef.current.position;
     pos.x = THREE.MathUtils.lerp(pos.x, radialDir.x * targetDist, LERP_SPEED);
     pos.y = THREE.MathUtils.lerp(pos.y, radialDir.y * targetDist, LERP_SPEED);

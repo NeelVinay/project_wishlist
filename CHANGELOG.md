@@ -4,6 +4,36 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.19.0 — CLAUDE.md & Codebase Documentation
+**Date:** March 11, 2026
+
+### Added
+- `CLAUDE.md` — guidance file for Claude Code describing commands, architecture, and conventions
+
+---
+
+## v0.18.0 — Space Starfield Background & Exploded View
+**Date:** March 11, 2026
+
+### Added
+- Starfield background on `/visualize` — 2,500 twinkling stars at varying depths via custom GLSL vertex/fragment shaders
+- Stars use additive blending and size attenuation; closer stars are larger and brighter for true depth perspective
+- Per-star random twinkling via sinusoidal phase offsets animated in `useFrame`
+- Exploded view toggle on the sphere — cells drift outward radially along their centroid direction
+- Auto-rotation when exploded view is active (slow Y-axis rotation)
+- Compound hover + explode offset along the same radial direction
+- `SphereControls` button switches between "Exploded View" and "Collapse" with red active state
+- OrbitControls max zoom-out increased to 20 to showcase starfield depth
+
+### Files Changed
+- `src/components/sphere/Starfield.jsx` — new component (custom shader-based star particles)
+- `src/components/sphere/BudgetSphere.jsx` — added Starfield, exploded prop, auto-rotation
+- `src/components/sphere/SphereCell.jsx` — added exploded offset logic
+- `src/components/sphere/SphereControls.jsx` — new component (explode toggle button)
+- `src/pages/DataVizPage.jsx` — wired exploded state, increased maxDistance
+
+---
+
 ## v0.17.0 — 3D Voronoi Sphere Visualization
 **Date:** March 11, 2026
 

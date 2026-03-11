@@ -1,13 +1,17 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import SphereCell from "./SphereCell";
 import WedgeDetail from "./WedgeDetail";
+import Starfield from "./Starfield";
 import { computeVoronoiCells } from "./VoronoiGeometry";
 
 const RADIUS = 2;
+const AUTO_ROTATE_SPEED = 0.15; // radians per second
 
-export default function BudgetSphere({ items, total, currency }) {
+export default function BudgetSphere({ items, total, currency, exploded }) {
   const [hoveredId, setHoveredId] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const groupRef = useRef();
 
   const { cells, icoGeo } = useMemo(
     () => computeVoronoiCells(items, total, RADIUS),
@@ -18,8 +22,17 @@ export default function BudgetSphere({ items, total, currency }) {
   const selectedCell = selectedId ? cells.find((c) => c.id === selectedId) : null;
   const singleItem = cells.length <= 1;
 
+  // Auto-rotate the group when in exploded view
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    if (exploded) {
+      groupRef.current.rotation.y += delta * AUTO_ROTATE_SPEED;
+    }
+  });
+
   return (
-    <group onPointerMissed={handleDeselect}>
+    <group ref={groupRef} onPointerMissed={handleDeselect}>
+      <Starfield />
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 5, 5]} intensity={0.8} />
       <directionalLight position={[-3, -2, -4]} intensity={0.3} />
@@ -35,6 +48,7 @@ export default function BudgetSphere({ items, total, currency }) {
           isSelected={selectedId === c.id}
           hasSelection={selectedId !== null}
           singleItem={singleItem}
+          exploded={exploded}
           onHover={(enter) => setHoveredId(enter ? c.id : null)}
           onSelect={() => setSelectedId(selectedId === c.id ? null : c.id)}
         />

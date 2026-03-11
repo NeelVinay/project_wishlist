@@ -144,6 +144,8 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Rotate (drag) and zoom (scroll) controls
 - [x] Slightly transparent materials for depth effect
 - [x] Solid cell geometry with visible cross-section on hover
+- [x] Exploded view toggle with auto-rotation
+- [x] Space starfield background — 2,500 twinkling stars at varying depths (custom GLSL shaders)
 
 ### Multi-Currency Support (Level 1)
 - [x] 38 currencies with code, symbol, name, country, and decimal places
@@ -184,7 +186,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 ### Advanced Data Visualizations Page
 - [x] 3D rotatable sphere visualization (Three.js + React Three Fiber)
 - [x] Sphere sectors sized by monetary value (Voronoi cells)
-- [ ] Exploded view toggle with auto-rotation
+- [x] Exploded view toggle with auto-rotation
 - [ ] Selectable geometry styles (Voronoi, curved triangles, hex grid, spiral bands)
 - [ ] Visual themes (default colors, Earth, Star Wars/Coruscant)
 - [ ] Multiple chart types (bar, treemap, bubble chart, etc.)

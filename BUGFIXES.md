@@ -4,6 +4,22 @@ All bug fixes for the Wishlist App are documented here.
 
 ---
 
+## BF-014 — Custom size attribute ignored by pointsMaterial
+**Date:** March 11, 2026
+**Version:** v0.18.0
+**Severity:** Medium
+
+### Problem
+The initial `Starfield` implementation used `<pointsMaterial>` with a fixed `size` prop alongside a per-vertex `size` buffer attribute. `pointsMaterial` does not read custom vertex attributes, so all stars rendered at the same size regardless of depth, removing the parallax depth effect.
+
+### Fix
+Replaced `pointsMaterial` with a `ShaderMaterial` using a custom vertex shader that reads the `size` attribute directly via `gl_PointSize = size * (200.0 / -mvPos.z)` and applies correct perspective attenuation. The fragment shader draws soft circular points using `smoothstep` on `gl_PointCoord` distance.
+
+### Files Changed
+- `src/components/sphere/Starfield.jsx` — Replaced pointsMaterial with custom ShaderMaterial
+
+---
+
 ## BF-013 — Voronoi geometry crash on non-indexed IcosahedronGeometry
 **Date:** March 11, 2026
 **Version:** v0.17.0
