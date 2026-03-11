@@ -179,6 +179,23 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Earned currency for visual house upgrades
 - [ ] Selectable village themes
 
+### Login & Authorization System
+- [ ] User accounts with secure authentication (JWT or session-based)
+- [ ] Persistent user profiles tied to wishlist data
+- [ ] Notification system for goal milestones (e.g. "You're 80% to your savings goal!")
+- [ ] Email or push notifications for deadlines and achievements
+- [ ] Per-user data isolation (each user sees only their own wishlist)
+
+### Space World Visualization (Gamification)
+- [ ] No Man's Sky-style 3D space environment (Three.js)
+- [ ] User controls a spaceship with first-person or third-person flight
+- [ ] Lightspeed travel between root items (planets)
+- [ ] Each planet represents a root wishlist item, sized/styled by budget or priority
+- [ ] Hovering over a planet reveals sub-items as orbiting moons or surface markers
+- [ ] Procedurally generated star fields, nebulae, and planet textures
+- [ ] Planet appearance reflects completion state (e.g. vibrant vs barren)
+- [ ] Smooth hyperdrive/warp animation when jumping between planets
+
 ### Persistence
 - [ ] Database backend (Express.js + SQLite)
 - [ ] Data abstraction layer for easy storage swap
@@ -188,11 +205,13 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 
 ## Tech Stack
 
-- **Frontend:** React 18
+- **Frontend:** React 19
 - **Build Tool:** Vite
+- **Routing:** React Router v6
 - **Styling:** Inline styles (no external CSS libraries)
 - **Persistence:** Database (planned — Express.js + SQLite)
-- **Planned Libraries:** React Router, Three.js, Phaser.js, D3.js
+- **Auth:** Planned — JWT or session-based
+- **Planned Libraries:** Three.js, Phaser.js, D3.js
 
 ---
 
