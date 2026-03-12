@@ -23,11 +23,9 @@ import CompletedRoot from "../components/CompletedRoot";
 
 export default function WishlistApp() {
   const dark = true;
-  const [currency, setCurrency] = useState(() => {
-    const code = loadCurrencyCode();
-    return CURRENCIES.find(c => c.code === code) || CURRENCIES[0];
-  });
-  const { state: items, set: setItems, undo, redo, canUndo, canRedo } = useUndoRedo(loadItems(), saveItems);
+  const [loading, setLoading] = useState(true);
+  const [currency, setCurrency] = useState(CURRENCIES[0]);
+  const { state: items, set: setItems, undo, redo, reset, canUndo, canRedo } = useUndoRedo([], saveItems);
   const [name, setName] = useState(""); const [priority, setPriority] = useState(""); const [budget, setBudget] = useState(""); const [saved, setSaved] = useState("");
   const [error, setError] = useState(""); const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); const [sortMode, setSortMode] = useState("priority"); const [reversed, setReversed] = useState(false);
@@ -37,17 +35,26 @@ export default function WishlistApp() {
   const [budgetPopup, setBudgetPopup] = useState(null);
   const [budgetExceeded, setBudgetExceeded] = useState(null);
   const [colorConflict, setColorConflict] = useState(null);
-  const [dontAskBudgetCap, setDontAskBudgetCap] = useState(() => loadPref("dontAskBudgetCap") ?? false);
+  const [dontAskBudgetCap, setDontAskBudgetCap] = useState(false);
   const [savedWillChange, setSavedWillChange] = useState(null);
   const [showCompleted, setShowCompleted] = useState(false);
+
+  useEffect(() => {
+    Promise.all([loadItems(), loadCurrencyCode(), loadPref("dontAskBudgetCap")]).then(([loadedItems, code, dontAskPref]) => {
+      if (loadedItems.length > 0) reset(loadedItems);
+      if (code) { const found = CURRENCIES.find(c => c.code === code); if (found) setCurrency(found); }
+      if (dontAskPref !== null) setDontAskBudgetCap(dontAskPref);
+      setLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
     const h = (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "z") { e.preventDefault(); if (e.shiftKey) redo(); else undo(); } };
     window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h);
   }, [undo, redo]);
 
-  useEffect(() => { saveCurrencyCode(currency.code); }, [currency]);
-  useEffect(() => { savePref("dontAskBudgetCap", dontAskBudgetCap); }, [dontAskBudgetCap]);
+  useEffect(() => { if (!loading) saveCurrencyCode(currency.code); }, [currency, loading]);
+  useEffect(() => { if (!loading) savePref("dontAskBudgetCap", dontAskBudgetCap); }, [dontAskBudgetCap, loading]);
 
   const displayed = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -152,6 +159,12 @@ export default function WishlistApp() {
 
   const tot = items.length, shown = displayed.length, searching = searchQuery.trim().length > 0;
   const bpItem = budgetPopup ? items.find((i) => i.id === budgetPopup.itemId) : null;
+
+  if (loading) return (
+    <div style={{ background: "#0a0a0a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',system-ui,-apple-system,sans-serif" }}>
+      <p style={{ fontSize: 16, color: "rgba(255,255,255,0.4)" }}>Loading...</p>
+    </div>
+  );
 
   return (
     <div style={{ background: dark ? "#0a0a0a" : "#f0f0f0", minHeight: "100vh", transition: "background 0.2s" }}>

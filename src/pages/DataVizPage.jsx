@@ -14,13 +14,13 @@ export default function DataVizPage() {
   const [exploded, setExploded] = useState(false);
 
   useEffect(() => {
-    const loaded = loadItems().filter((i) => !i.completed);
-    setItems(loaded);
-    const code = loadCurrencyCode();
-    if (code) {
-      const found = CURRENCIES.find((c) => c.code === code);
-      if (found) setCurrency(found);
-    }
+    Promise.all([loadItems(), loadCurrencyCode()]).then(([loaded, code]) => {
+      setItems(loaded.filter((i) => !i.completed));
+      if (code) {
+        const found = CURRENCIES.find((c) => c.code === code);
+        if (found) setCurrency(found);
+      }
+    });
   }, []);
 
   const total = items.reduce((s, i) => s + getItemBudget(i), 0);

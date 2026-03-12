@@ -1,54 +1,72 @@
-const KEYS = {
-  ITEMS: "wishlist_items",
-  CURRENCY: "wishlist_currency",
-  PREFS: "wishlist_prefs_",
-};
-
-export function loadItems() {
+export async function loadItems() {
   try {
-    const raw = localStorage.getItem(KEYS.ITEMS);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    const res = await fetch("/api/items");
+    if (!res.ok) return [];
+    return await res.json();
   } catch {
-    console.warn("Failed to load wishlist items from localStorage");
+    console.warn("Failed to load wishlist items from server");
     return [];
   }
 }
 
-export function saveItems(items) {
+export async function saveItems(items) {
   try {
-    localStorage.setItem(KEYS.ITEMS, JSON.stringify(items));
-  } catch {
-    console.warn("Failed to save wishlist items to localStorage");
+    const res = await fetch("/api/items", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(items),
+    });
+    if (!res.ok) console.warn("Save items failed:", res.status);
+  } catch (err) {
+    console.warn("Failed to save wishlist items to server:", err.message);
   }
 }
 
-export function loadCurrencyCode() {
-  return localStorage.getItem(KEYS.CURRENCY);
-}
-
-export function saveCurrencyCode(code) {
+export async function loadCurrencyCode() {
   try {
-    localStorage.setItem(KEYS.CURRENCY, code);
+    const res = await fetch("/api/currency");
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.code;
   } catch {
-    console.warn("Failed to save currency to localStorage");
+    console.warn("Failed to load currency from server");
+    return null;
   }
 }
 
-export function loadPref(key) {
+export async function saveCurrencyCode(code) {
   try {
-    const raw = localStorage.getItem(KEYS.PREFS + key);
-    return raw !== null ? JSON.parse(raw) : null;
+    const res = await fetch("/api/currency", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    if (!res.ok) console.warn("Save currency failed:", res.status);
+  } catch (err) {
+    console.warn("Failed to save currency to server:", err.message);
+  }
+}
+
+export async function loadPref(key) {
+  try {
+    const res = await fetch(`/api/prefs/${encodeURIComponent(key)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.value;
   } catch {
     return null;
   }
 }
 
-export function savePref(key, value) {
+export async function savePref(key, value) {
   try {
-    localStorage.setItem(KEYS.PREFS + key, JSON.stringify(value));
-  } catch {
-    console.warn(`Failed to save preference "${key}" to localStorage`);
+    const res = await fetch(`/api/prefs/${encodeURIComponent(key)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+    if (!res.ok) console.warn(`Save pref "${key}" failed:`, res.status);
+  } catch (err) {
+    console.warn(`Failed to save preference "${key}" to server:`, err.message);
   }
 }

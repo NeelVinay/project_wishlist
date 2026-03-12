@@ -4,6 +4,31 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.20.0 — Database Persistence (Express.js + SQLite)
+**Date:** March 11, 2026
+
+### Added
+- Express.js backend with REST API (`server/index.js`, port 3001)
+- SQLite database via `better-sqlite3` (`server/db.js`) with `items` and `preferences` tables
+- API routes: `GET/PUT /api/items`, `GET/PUT /api/currency`, `GET/PUT /api/prefs/:key`
+- Vite proxy configuration forwarding `/api` requests to Express during development
+- `npm run dev` now starts both Vite and Express concurrently via `concurrently`
+- `npm run start` to run Express server standalone
+- Loading screen in WishlistApp while initial data fetches from the API
+- `reset()` method on `useUndoRedo` hook for async initialization without triggering persistence
+
+### Changed
+- `src/utils/storage.js` — all 6 functions rewritten from synchronous localStorage to async `fetch`-based API calls
+- `src/pages/WishlistApp.jsx` — async data loading via `Promise.all` with loading guard on save effects
+- `src/pages/DataVizPage.jsx` — async data loading via `Promise.all`
+- `src/hooks/useUndoRedo.js` — added `reset` to returned API
+- `package.json` — added `express`, `better-sqlite3`, `concurrently`; updated `dev` script
+
+### Removed
+- All localStorage usage (replaced by SQLite database)
+
+---
+
 ## v0.19.0 — CLAUDE.md & Codebase Documentation
 **Date:** March 11, 2026
 

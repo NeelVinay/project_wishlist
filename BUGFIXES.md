@@ -4,6 +4,38 @@ All bug fixes for the Wishlist App are documented here.
 
 ---
 
+## BF-016 — Save functions silently succeed on server errors
+**Date:** March 11, 2026
+**Version:** v0.20.0
+**Severity:** High
+
+### Problem
+`saveItems`, `saveCurrencyCode`, and `savePref` in the async fetch-based `storage.js` awaited `fetch()` but never checked `res.ok`. If the Express server returned an error (e.g., 502 from Vite proxy during startup), the save appeared to succeed without actually persisting data. Items added in WishlistApp would not appear on the DataVizPage after navigation.
+
+### Fix
+Added `res.ok` checks to all three save functions. Non-OK responses now log warnings with the status code. Error messages in catch blocks now include `err.message` for better diagnostics.
+
+### Files Changed
+- `src/utils/storage.js` — Added `res.ok` checks and improved error logging in all save functions
+
+---
+
+## BF-015 — Save effects overwrite database values on mount
+**Date:** March 11, 2026
+**Version:** v0.20.0
+**Severity:** High
+
+### Problem
+The `useEffect` hooks for `saveCurrencyCode` and `savePref` in WishlistApp fired immediately on component mount with default values (USD, false), racing with the async data load from the API. If the save completed before the load, the database values were overwritten with defaults.
+
+### Fix
+Added `!loading` guard to both save effects. They now only fire after the initial async load completes and `loading` is set to `false`. Added `loading` to the dependency arrays.
+
+### Files Changed
+- `src/pages/WishlistApp.jsx` — Guarded currency and preference save effects with `!loading` check
+
+---
+
 ## BF-014 — Custom size attribute ignored by pointsMaterial
 **Date:** March 11, 2026
 **Version:** v0.18.0

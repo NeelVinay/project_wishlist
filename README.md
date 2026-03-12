@@ -1,6 +1,6 @@
 # Wishlist App
 
-A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories (classes), rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars. Features interactive donut chart visualization, a 3D Voronoi sphere budget visualization, localStorage persistence, multi-currency support, and a completed items section.
+A personal wishlist manager built with React + Vite. Add items, organize them with sub-categories (classes), rate their priority, track your spending with budget caps and savings, and monitor your progress with weighted completion and savings progress bars. Features interactive donut chart visualization, a 3D Voronoi sphere budget visualization with space starfield background, exploded view with auto-rotation, database persistence (Express.js + SQLite), multi-currency support, and a completed items section.
 
 ---
 
@@ -127,12 +127,15 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Info panel animates in with opacity and slide transition
 - [x] "Hover over a segment to see details" placeholder when not hovering
 
-### localStorage Persistence
-- [x] Wishlist items persist across page refreshes via localStorage
+### Database Persistence (Express.js + SQLite)
+- [x] Wishlist items persist across page refreshes via SQLite database
 - [x] Currency selection persists
 - [x] User preferences (e.g., "don't ask budget cap") persist
-- [x] Graceful fallback on corrupted or missing data
-- [x] Centralized storage utility for easy future database migration
+- [x] Express.js REST API backend with `better-sqlite3`
+- [x] Vite proxy forwards `/api` requests to Express during development
+- [x] `npm run dev` starts both frontend and backend concurrently
+- [x] Graceful fallback on server errors (async fetch with error handling)
+- [x] Centralized storage utility (`storage.js`) abstracts API calls
 
 ### 3D Voronoi Sphere Visualization
 - [x] Interactive 3D sphere on the Data Visualization page (`/visualize`)
@@ -219,9 +222,9 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Smooth hyperdrive/warp animation when jumping between planets
 
 ### Persistence
-- [x] localStorage persistence (current — items, currency, preferences)
-- [ ] Database backend (Express.js + SQLite)
-- [ ] Data abstraction layer for easy storage swap
+- [x] localStorage persistence (replaced by database)
+- [x] Database backend (Express.js + SQLite)
+- [x] Data abstraction layer for easy storage swap
 
 ---
 
@@ -232,7 +235,8 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - **Routing:** React Router v6
 - **Styling:** Inline styles (no external CSS libraries)
 - **3D Visualization:** Three.js, React Three Fiber, drei
-- **Persistence:** localStorage (current), database planned (Express.js + SQLite)
+- **Backend:** Express.js + better-sqlite3
+- **Persistence:** SQLite database (via REST API)
 - **Auth:** Planned — JWT or session-based
 - **Planned Libraries:** Phaser.js, D3.js
 
@@ -248,7 +252,7 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
    npm install
    npm run dev
    ```
-4. Open http://localhost:5173 in your browser
+4. Open http://localhost:5173 in your browser (starts both Vite frontend and Express API server)
 
 ---
 
@@ -266,7 +270,7 @@ wishlist/
 │   ├── constants/
 │   │   └── currencies.js           # 38 currencies
 │   ├── utils/
-│   │   ├── storage.js              # localStorage persistence
+│   │   ├── storage.js              # Async API persistence (fetch → Express)
 │   │   ├── calculations.js         # Budget/progress calculations
 │   │   ├── formatting.js           # Currency formatting
 │   │   ├── sorting.js              # Sort functions
@@ -289,6 +293,13 @@ wishlist/
 │       ├── ProgressSection.jsx      # Progress bars
 │       ├── WItem.jsx                # Wishlist item row
 │       └── ...                      # Other UI components
+├── server/
+│   ├── index.js                    # Express app entry point
+│   ├── db.js                       # SQLite connection + schema + helpers
+│   └── routes/
+│       ├── items.js                # GET/PUT /api/items
+│       ├── currency.js             # GET/PUT /api/currency
+│       └── prefs.js                # GET/PUT /api/prefs/:key
 ├── README.md
 ├── CHANGELOG.md
 └── BUGFIXES.md
