@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
-import DataVizPage from "./pages/DataVizPage";
+import VizGalleryPage from "./pages/VizGalleryPage";
+import VizViewerPage from "./pages/VizViewerPage";
 import WishlistApp from "./pages/WishlistApp";
 
 export default function App() {
@@ -13,7 +14,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/app" element={<WishlistApp />} />
-        <Route path="/visualize" element={<DataVizPage />} />
+        <Route path="/visualize" element={<VizGalleryPage />} />
+        <Route path="/visualize/:vizId" element={<VizViewerPage />} />
         <Route path="/about" element={<AboutPage />} />
       </Routes>
     </BrowserRouter>

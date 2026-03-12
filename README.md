@@ -137,8 +137,15 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [x] Graceful fallback on server errors (async fetch with error handling)
 - [x] Centralized storage utility (`storage.js`) abstracts API calls
 
+### Visualization Gallery
+- [x] Visualization gallery page at `/visualize` with card-based selection UI
+- [x] Static SVG preview icons for each visualization type
+- [x] Hover-to-enlarge cards with accent border glow
+- [x] Auto-hiding NavBar on active visualization pages (reappears on mouse hover near top of screen)
+- [x] "Back to Gallery" button on each visualization
+
 ### 3D Voronoi Sphere Visualization
-- [x] Interactive 3D sphere on the Data Visualization page (`/visualize`)
+- [x] Interactive 3D sphere on the Data Visualization page (`/visualize/sphere`)
 - [x] Sphere divided into organic Voronoi-like cells (cracked-earth aesthetic)
 - [x] Cell area proportional to each item's budget share
 - [x] Hover: cell pulls out radially from sphere with name label
@@ -176,10 +183,10 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Smooth flip/slide transition on click
 
 ### Multi-Page Routing
-- [ ] React Router implementation with navigation bar
-- [ ] Landing page with feature overview and "Get Started" CTA
-- [ ] Main wishlist page (current app)
-- [ ] Data visualization page
+- [x] React Router implementation with navigation bar
+- [x] Landing page with feature overview and "Get Started" CTA
+- [x] Main wishlist page (current app)
+- [x] Data visualization gallery with per-visualization sub-routes
 
 ### Goals System
 - [ ] User-defined targets (hit X% completion by a date, buy X items, save $X for an item)
@@ -187,12 +194,13 @@ This app lets you create and manage a prioritized wishlist. Each item has a name
 - [ ] Goal completion notifications
 
 ### Advanced Data Visualizations Page
+- [x] Visualization gallery with card-based selection and auto-hiding navbar
 - [x] 3D rotatable sphere visualization (Three.js + React Three Fiber)
 - [x] Sphere sectors sized by monetary value (Voronoi cells)
 - [x] Exploded view toggle with auto-rotation
 - [ ] Selectable geometry styles (Voronoi, curved triangles, hex grid, spiral bands)
 - [ ] Visual themes (default colors, Earth, Star Wars/Coruscant)
-- [ ] Multiple chart types (bar, treemap, bubble chart, etc.)
+- [ ] Additional chart types (bar, treemap, bubble chart, etc.)
 
 ### Wishlist Village (Gamification)
 - [ ] Stardew Valley-style 2D pixel art village
@@ -268,7 +276,8 @@ wishlist/
 │   ├── App.jsx                     # Router + NavBar
 │   ├── styles.js                   # Shared style functions + ACCENT color
 │   ├── constants/
-│   │   └── currencies.js           # 38 currencies
+│   │   ├── currencies.js           # 38 currencies
+│   │   └── visualizations.js       # Visualization options config
 │   ├── utils/
 │   │   ├── storage.js              # Async API persistence (fetch → Express)
 │   │   ├── calculations.js         # Budget/progress calculations
@@ -280,9 +289,14 @@ wishlist/
 │   ├── pages/
 │   │   ├── LandingPage.jsx         # Home page
 │   │   ├── WishlistApp.jsx         # Main wishlist (stateful)
-│   │   ├── DataVizPage.jsx         # 3D sphere visualization
+│   │   ├── VizGalleryPage.jsx      # Visualization gallery selector
+│   │   ├── VizViewerPage.jsx       # Active visualization wrapper
+│   │   ├── DataVizPage.jsx         # 3D sphere visualization (legacy)
 │   │   └── AboutPage.jsx           # About page
 │   └── components/
+│       ├── viz/
+│       │   ├── VizCard.jsx          # Gallery card component
+│       │   └── VizPreviews.jsx      # Static SVG preview icons
 │       ├── sphere/
 │       │   ├── VoronoiGeometry.js   # Voronoi cell computation
 │       │   ├── SphereCell.jsx       # Individual cell mesh + interactions

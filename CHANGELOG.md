@@ -4,6 +4,30 @@ All notable changes to the Wishlist App are documented here.
 
 ---
 
+## v0.21.0 — Visualization Gallery & Auto-Hiding NavBar
+**Date:** March 12, 2026
+
+### Added
+- Visualization gallery page at `/visualize` with card-based selection UI
+- `VizGalleryPage.jsx` — gallery with title, subtitle, radial gradient accents, and centered card grid
+- `VizViewerPage.jsx` — wrapper page at `/visualize/:vizId` that renders the selected visualization with a "Back to Gallery" button
+- `VizCard.jsx` — hover-animated gallery card with scale, accent border glow, and box-shadow transitions
+- `VizPreviews.jsx` — static SVG preview icons for each visualization type
+- `src/constants/visualizations.js` — visualization options configuration
+- Auto-hiding NavBar on active visualization pages: slides up and fades out, reappears when mouse hovers near top ~60px of screen
+- Invisible trigger zone (z-index 501) ensures smooth mouse transition into the revealed navbar
+
+### Changed
+- `src/App.jsx` — replaced single `/visualize` route with `/visualize` (gallery) and `/visualize/:vizId` (viewer)
+- `src/components/NavBar.jsx` — added auto-hide behavior with `hovering` state, CSS transform/opacity transitions, and `isActiveViz` detection
+- NavBar "Data Visualization" link now highlights as active for both `/visualize` and `/visualize/*` paths
+
+### Notes
+- Gallery currently features 3D Voronoi Sphere as the sole visualization; architecture supports adding more
+- `DataVizPage.jsx` retained but no longer directly routed (sphere rendering moved into VizViewerPage)
+
+---
+
 ## v0.20.0 — Database Persistence (Express.js + SQLite)
 **Date:** March 11, 2026
 

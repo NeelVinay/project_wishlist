@@ -20,7 +20,8 @@ React 19 SPA with Vite, React Router v6, and Three.js for 3D visualization. No e
 ### Routes (`App.jsx`)
 - `/` — Landing page
 - `/app` — Main wishlist manager (`WishlistApp.jsx`)
-- `/visualize` — 3D Voronoi sphere budget visualization (`DataVizPage.jsx`)
+- `/visualize` — Visualization gallery (`VizGalleryPage.jsx`)
+- `/visualize/:vizId` — Active visualization (`VizViewerPage.jsx`), e.g. `/visualize/sphere`
 - `/about` — About page
 
 ### State & Persistence
@@ -31,8 +32,15 @@ React 19 SPA with Vite, React Router v6, and Three.js for 3D visualization. No e
 ### Budget Hierarchy
 Root items have a `budget` (cap) and `saved` amount. Sub-items have independent budget/saved. Key invariant: when sub-items exist, the root's `saved` auto-calculates as the sum of sub-item saved amounts (not manually editable). Sub-item budgets are validated against the root's budget cap.
 
+### Visualization Gallery & Viewer
+- `VizGalleryPage` shows a card gallery of available visualizations at `/visualize`
+- `VizViewerPage` renders the selected visualization at `/visualize/:vizId`
+- `VizCard` and `VizPreviews` provide the gallery UI with static SVG preview icons
+- Visualization options defined in `src/constants/visualizations.js`
+- NavBar auto-hides on active visualization pages (slides up, reappears on mouse hover near top)
+
 ### 3D Visualization Pipeline
-1. `DataVizPage` loads non-completed items from localStorage
+1. `VizViewerPage` loads non-completed items from the database
 2. `BudgetSphere` orchestrates the scene (lights, cells, selection state, auto-rotation)
 3. `VoronoiGeometry.js` — `computeVoronoiCells()` creates a subdivided icosahedron (detail=5, 20K faces), places seeds via Fibonacci spiral with budget-proportional latitude, assigns faces to nearest seed
 4. `SphereCell` renders each cell mesh with useFrame lerp animations for hover/select/explode
