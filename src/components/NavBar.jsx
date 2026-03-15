@@ -6,12 +6,14 @@ export default function NavBar() {
   const location = useLocation();
   const [hovering, setHovering] = useState(false);
   const isHome = location.pathname === "/";
-  const isActiveViz = location.pathname.startsWith("/visualize/");
+  const isActiveViz = location.pathname.startsWith("/visualize/") || location.pathname.startsWith("/gamify/");
   const isVizSection = location.pathname.startsWith("/visualize");
+  const isGamifySection = location.pathname.startsWith("/gamify");
   const pages = [
     { path: "/", label: "Home" },
     { path: "/app", label: "WishAway" },
     { path: "/visualize", label: "Data Visualization" },
+    { path: "/gamify", label: "Gamify" },
     { path: "/about", label: "Who We Are" },
   ];
 
@@ -26,6 +28,8 @@ export default function NavBar() {
         {pages.map((item) => {
           const active = item.path === "/visualize"
             ? isVizSection
+            : item.path === "/gamify"
+            ? isGamifySection
             : location.pathname === item.path;
           return (
             <Link key={item.path} to={item.path} style={{
