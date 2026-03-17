@@ -16,6 +16,7 @@ export default function VizViewerPage() {
   const [items, setItems] = useState([]);
   const [currency, setCurrency] = useState(CURRENCIES[0]);
   const [exploded, setExploded] = useState(false);
+  const [scorched, setScorched] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -62,10 +63,15 @@ export default function VizViewerPage() {
         scene={{ background: new THREE.Color(0x000000) }}
         onPointerMissed={() => {}}
       >
-        <BudgetSphere items={items} total={total} currency={currency} exploded={exploded} />
+        <BudgetSphere items={items} total={total} currency={currency} exploded={exploded} scorched={scorched} />
         <OrbitControls makeDefault enableDamping dampingFactor={0.08} minDistance={3} maxDistance={20} />
       </Canvas>
-      <SphereControls exploded={exploded} onToggleExplode={() => setExploded((e) => !e)} />
+      <SphereControls
+        exploded={exploded}
+        onToggleExplode={() => setExploded((e) => !e)}
+        scorched={scorched}
+        onToggleScorched={() => setScorched((s) => !s)}
+      />
       <button
         onClick={() => navigate("/visualize")}
         style={{

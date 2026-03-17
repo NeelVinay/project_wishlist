@@ -9,9 +9,21 @@ const EXPLODE_OFFSET = 0.8;
 const LERP_SPEED = 0.1;
 const BASE_OPACITY = 0.82;
 
+// Deterministic dark charcoal color per cell for scorched theme
+// Visible against black background even in exploded/hover view
+function scorchedColor(id) {
+  let h = 0;
+  const s = String(id);
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  const base = 45 + Math.abs(h % 20); // 45-65 range: dark charcoal, clearly distinct from black
+  // Slight cool tint to avoid brown
+  return `rgb(${base},${base + Math.abs((h >> 8) % 4)},${base + Math.abs((h >> 16) % 6)})`;
+}
+
 export default React.memo(function SphereCell({
   icoGeo, cellData, radius, color, name,
   isHovered, isSelected, hasSelection, singleItem, exploded,
+  scorched,
   onHover, onSelect,
 }) {
   const groupRef = useRef();
@@ -29,9 +41,11 @@ export default React.memo(function SphereCell({
   );
 
   const geometry = useMemo(
-    () => createCellGeometry(icoGeo, cellData.faceIndices, cellData.centroid, cellData.boundaryEdges),
-    [icoGeo, cellData]
+    () => createCellGeometry(icoGeo, cellData.faceIndices, cellData.centroid, cellData.boundaryEdges, scorched),
+    [icoGeo, cellData, scorched]
   );
+
+  const cellColor = scorched ? scorchedColor(cellData.id) : color;
 
   useFrame(() => {
     if (!groupRef.current) return;
@@ -48,7 +62,8 @@ export default React.memo(function SphereCell({
 
     // Opacity
     if (matRef.current) {
-      const targetOpacity = hasSelection && !isSelected ? 0.08 : BASE_OPACITY;
+      const base = scorched ? 0.95 : BASE_OPACITY;
+      const targetOpacity = hasSelection && !isSelected ? 0.08 : base;
       matRef.current.opacity = THREE.MathUtils.lerp(matRef.current.opacity, targetOpacity, LERP_SPEED);
     }
   });
@@ -61,7 +76,15 @@ export default React.memo(function SphereCell({
       onClick={(e) => { e.stopPropagation(); onSelect(); }}
     >
       <mesh geometry={geometry}>
-        <meshStandardMaterial ref={matRef} color={color} side={THREE.DoubleSide} transparent opacity={BASE_OPACITY} />
+        <meshStandardMaterial
+          ref={matRef}
+          color={cellColor}
+          side={THREE.DoubleSide}
+          transparent
+          opacity={BASE_OPACITY}
+          roughness={scorched ? 0.95 : 0.5}
+          metalness={scorched ? 0.1 : 0.0}
+        />
       </mesh>
       {isHovered && !isSelected && !singleItem && (
         <Html position={labelPos} center style={{ pointerEvents: "none" }}>

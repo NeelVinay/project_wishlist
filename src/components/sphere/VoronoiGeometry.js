@@ -3,6 +3,7 @@ import { getItemBudget } from "../../utils/calculations";
 
 const GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
 const CELL_GAP = 0.008; // lerp factor toward centroid for cracked-earth gaps
+const SCORCHED_GAP = 0.08; // wider cracks for scorched planet theme
 
 // Helper: get vertex index for face f, vertex v (0-2) — works for both indexed and non-indexed geo
 function faceVertexIndex(idx, f, v) {
@@ -109,8 +110,25 @@ export function computeVoronoiCells(items, total, radius, detail = 5) {
   return { cells, icoGeo };
 }
 
+// Multi-octave hash noise for irregular, organic crack edges
+function hash3(x, y, z) {
+  const n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+function hash3b(x, y, z) {
+  const n = Math.sin(x * 269.5 + y * 183.3 + z * 421.1) * 32187.7137;
+  return n - Math.floor(n);
+}
+function scorchedNoise(x, y, z) {
+  // 3 octaves of hash noise at different frequencies for organic irregularity
+  const o1 = hash3(x * 3.7, y * 3.7, z * 3.7);
+  const o2 = hash3b(x * 7.3, y * 7.3, z * 7.3) * 0.5;
+  const o3 = hash3(x * 15.1, y * 15.1, z * 15.1) * 0.25;
+  return (o1 + o2 + o3) / 1.75; // normalized 0..1
+}
+
 // Helper: read a vertex from the icosahedron, apply gap shrink toward centroid
-function shrinkVertex(posAttr, vi, centroid) {
+function shrinkVertex(posAttr, vi, centroid, scorched = false) {
   const x = posAttr.getX(vi);
   const y = posAttr.getY(vi);
   const z = posAttr.getZ(vi);
@@ -118,17 +136,25 @@ function shrinkVertex(posAttr, vi, centroid) {
   const tx = centroid.x * r;
   const ty = centroid.y * r;
   const tz = centroid.z * r;
+
+  let gap = CELL_GAP;
+  if (scorched) {
+    // Highly irregular gap: wide range from tight to very wide cracks
+    const noise = scorchedNoise(x, y, z);
+    gap = SCORCHED_GAP * (0.2 + noise * 1.6);
+  }
+
   return [
-    x + (tx - x) * CELL_GAP,
-    y + (ty - y) * CELL_GAP,
-    z + (tz - z) * CELL_GAP,
+    x + (tx - x) * gap,
+    y + (ty - y) * gap,
+    z + (tz - z) * gap,
   ];
 }
 
 /**
  * Creates geometry for a single Voronoi cell: surface faces + boundary side walls.
  */
-export function createCellGeometry(icoGeo, faceIndices, centroid, boundaryEdges) {
+export function createCellGeometry(icoGeo, faceIndices, centroid, boundaryEdges, scorched = false) {
   const posAttr = icoGeo.getAttribute("position");
   const idx = icoGeo.getIndex();
   const positions = [];
@@ -137,17 +163,20 @@ export function createCellGeometry(icoGeo, faceIndices, centroid, boundaryEdges)
   for (const f of faceIndices) {
     for (let v = 0; v < 3; v++) {
       const vi = faceVertexIndex(idx, f, v);
-      const [sx, sy, sz] = shrinkVertex(posAttr, vi, centroid);
+      const [sx, sy, sz] = shrinkVertex(posAttr, vi, centroid, scorched);
       positions.push(sx, sy, sz);
     }
   }
 
   // Boundary side walls: triangles from surface edge to origin
-  for (const [v0, v1] of boundaryEdges) {
-    const [x0, y0, z0] = shrinkVertex(posAttr, v0, centroid);
-    const [x1, y1, z1] = shrinkVertex(posAttr, v1, centroid);
-    positions.push(x0, y0, z0, x1, y1, z1, 0, 0, 0);
-    positions.push(x1, y1, z1, x0, y0, z0, 0, 0, 0);
+  // Skip in scorched mode so magma sphere shows through the cracks
+  if (!scorched) {
+    for (const [v0, v1] of boundaryEdges) {
+      const [x0, y0, z0] = shrinkVertex(posAttr, v0, centroid, false);
+      const [x1, y1, z1] = shrinkVertex(posAttr, v1, centroid, false);
+      positions.push(x0, y0, z0, x1, y1, z1, 0, 0, 0);
+      positions.push(x1, y1, z1, x0, y0, z0, 0, 0, 0);
+    }
   }
 
   const geo = new THREE.BufferGeometry();

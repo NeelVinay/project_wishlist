@@ -3,12 +3,13 @@ import { useFrame } from "@react-three/fiber";
 import SphereCell from "./SphereCell";
 import WedgeDetail from "./WedgeDetail";
 import Starfield from "./Starfield";
+import MagmaSphere from "./MagmaSphere";
 import { computeVoronoiCells } from "./VoronoiGeometry";
 
 const RADIUS = 2;
 const AUTO_ROTATE_SPEED = 0.15; // radians per second
 
-export default function BudgetSphere({ items, total, currency, exploded }) {
+export default function BudgetSphere({ items, total, currency, exploded, scorched }) {
   const [hoveredId, setHoveredId] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const groupRef = useRef();
@@ -33,9 +34,13 @@ export default function BudgetSphere({ items, total, currency, exploded }) {
   return (
     <group ref={groupRef} onPointerMissed={handleDeselect}>
       <Starfield />
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[5, 5, 5]} intensity={0.8} />
-      <directionalLight position={[-3, -2, -4]} intensity={0.3} />
+      <ambientLight intensity={scorched ? 0.25 : 0.4} />
+      <directionalLight position={[5, 5, 5]} intensity={scorched ? 0.5 : 0.8} />
+      <directionalLight position={[-3, -2, -4]} intensity={scorched ? 0.2 : 0.3} />
+      {scorched && <MagmaSphere radius={RADIUS} />}
+      {scorched && (
+        <pointLight position={[0, 0, 0]} color="#ff5500" intensity={3} distance={8} />
+      )}
       {cells.map((c) => (
         <SphereCell
           key={c.id}
@@ -49,6 +54,7 @@ export default function BudgetSphere({ items, total, currency, exploded }) {
           hasSelection={selectedId !== null}
           singleItem={singleItem}
           exploded={exploded}
+          scorched={scorched}
           onHover={(enter) => setHoveredId(enter ? c.id : null)}
           onSelect={() => setSelectedId(selectedId === c.id ? null : c.id)}
         />
